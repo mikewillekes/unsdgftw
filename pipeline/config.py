@@ -6,6 +6,8 @@ TEXT_DIR = '2-text'
 CLEANTEXT_DIR = '3-cleantext'
 NLP_DIR = '4-nlp'
 
+DOCUMENT_METADATA_FILENAME = 'metadata.jsonl'
+
 # File extensions
 # RAW_EXTENSION is excluded b/c it can be anything that TIKA can support parsing
 TEXT_EXTENSION = '.xml'

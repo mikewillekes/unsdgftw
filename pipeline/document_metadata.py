@@ -20,7 +20,7 @@ class DocumentMetadata:
 def load_metadata(filename):
     # Deserialized from Jsonl file
     metadata = []
-    with (filename, 'r') as fp:
+    with open(filename, 'r') as fp:
         for line in fp.readlines():
             metadata.append(from_json(DocumentMetadata, line.strip()))
     return metadata

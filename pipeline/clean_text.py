@@ -1,77 +1,87 @@
+from distutils.command.config import config
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
 import dataclasses
 import re
-import spacy
-from collections import Counter
-from typing import List
 import json
 import unicodedata
+import document_metadata
+import pipeline.config
+import paragraph_metadata
+from paragraph_metadata import ParagraphMetadata
 
-""" Clean the IPES Global Assessment Report on Biodiversity and Ecosystem Services
+""" Read a DocumentMetadata and extract cleared Paragraphs + ParagraphMetadata ready for NLP
 """
 
-@dataclass
-class Paragraph:
-    page_number: int
-    paragraph_number: int
-    paragraph_len: int
-    keywords: List[str]
-    clean_text: str
-    raw_text: str
 
 def main():
-
-    nlp = spacy.load('en_core_web_lg')
-
-
-    result = []
-
-    # Extract Raw and Cleaned (ready for NLP) paragraphs from the XHTML text document
-    for p in clean_document('./corpus/IPBES/2-text/202111_2020 IPBES GLOBAL REPORT_FULL_DIGITAL_NOV 2021.pdf.xml'):
-        if len(p.clean_text) > 500:
-            p.keywords = get_keywords(p.clean_text, nlp)
-            # print(f'{p.page_number}:{p.paragraph_number}:{p.keywords}\n{p.clean_text}')
-            print(f'{p.page_number}:{p.paragraph_number}:{p.keywords}')
-            result.append(json.dumps(dataclasses.asdict(p)) + '\n')
-
-    open('./corpus/IPBES/3-cleantext/202111_2020 IPBES GLOBAL REPORT_FULL_DIGITAL_NOV 2021.jsonl', 'w').writelines(result)
+    paragraphs = clean_document_collection('IUCN')
 
 
-# Very naive Keyword / Hashtag extraction using POS tagging to pull out
-# Proper nouns, Adjectives and Nouns.
-# https://betterprogramming.pub/extract-keywords-using-spacy-in-python-4a8415478fbf
-def get_keywords(text, nlp):
-    keywords = []
-    for token in nlp(text.lower()):
-        if token.pos_ in ['PROPN', 'ADJ', 'NOUN']:
-            keywords.append(f'{token.text}')
-    return [('#' + keyword[0]) for keyword in Counter(keywords).most_common(5)]
-    
+def clean_document_collection(document_collection_name):
 
-def clean_document(filename):
-    with open(filename) as fin:
+    print('====================')
+    document_metadata_filename = f'{config.CORPUS_DIR}/{document_collection_name}/{config.DOCUMENT_METADATA_FILENAME}'
+    print(f'Cleaning document collection: {document_collection_name}')
+    documents = document_metadata.load_metadata(document_metadata_filename)
+
+    for document in documents:
+        clean_xhtml_document(document_collection_name, document)
+
+
+    # # Extract Raw and Cleaned (ready for NLP) paragraphs from the XHTML text document
+    # for p in clean_document('./corpus/IPBES/2-text/202111_2020 IPBES GLOBAL REPORT_FULL_DIGITAL_NOV 2021.pdf.xml'):
+    #     if len(p.clean_text) > 500:
+    #         p.keywords = get_keywords(p.clean_text, nlp)
+    #         # print(f'{p.page_number}:{p.paragraph_number}:{p.keywords}\n{p.clean_text}')
+    #         print(f'{p.page_number}:{p.paragraph_number}:{p.keywords}')
+    #         result.append(json.dumps(dataclasses.asdict(p)) + '\n')
+
+    # open('./corpus/IPBES/3-cleantext/202111_2020 IPBES GLOBAL REPORT_FULL_DIGITAL_NOV 2021.jsonl', 'w').writelines(result)
+
+   
+
+def clean_xhtml_document(document_collection_name, document):
+
+    print('--------------------')
+    xhtml_filename = f'{config.CORPUS_DIR}/{document_collection_name}/{config.TEXT_DIR}/{document.local_filename}{config.TEXT_EXTENSION}'
+    print(document.title)
+    print(xhtml_filename)
+
+    with open(xhtml_filename) as fin:
         soup = BeautifulSoup(fin, 'html.parser')
         for page_number, page in enumerate(soup.find_all('div', class_='page')):
             for paragraph_number, paragraph in enumerate(page.find_all('p')):
 
-                raw_text = normalize_whitespace(paragraph.text)
-                clean_text = clean_paragraph_text(raw_text)
+                raw_text = normalize_unicode(normalize_whitespace(paragraph.text))
+                clean_text = clean_parentheses(raw_text)
 
-                yield Paragraph(
-                    page_number=page_number,
-                    paragraph_number=paragraph_number,
-                    paragraph_len=len(clean_text),
-                    keywords=[],
+                yield ParagraphMetadata(
+                    document.organization,
+                    document.local_filename,
+                    document.about_url,
+                    document.download_url,
+                    document.title,
+                    document.summary,
+                    document.year,
+                    page_number,
+                    paragraph_number,
+                    len(clean_text),
                     clean_text=clean_text,
                     raw_text=raw_text)
+
 
 def normalize_whitespace(s):
     # Normalize all whitespace and newlines to a single line
     return ' '.join(s.split())
 
 
-def clean_paragraph_text(text):
+def normalize_unicode(s):
+    # Normalize/collapse unicode characters to the best ASCII equivilent
+    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode()
+
+
+def clean_parentheses(s):
 
     # A lot of the source PDFs are academic papers - so have a lot of
     # endnote references. Like:
@@ -98,21 +108,16 @@ def clean_paragraph_text(text):
     # just too difficult to understand otherwise
 
     # Regular Parens ()
-    #text = re.sub(r'\s+\([^()]*\)', '', text)
+    #s = re.sub(r'\s+\([^()]*\)', '', s)
 
     # Curly Parens {}
-    #text = re.sub(r'\s+{[^{}]*}', '', text)
+    #s = re.sub(r'\s+{[^{}]*}', '', s)
 
     # Square Parens []
-    #text = re.sub(r'\s+\[[^\[\]]*\]', '', text)
+    #s = re.sub(r'\s+\[[^\[\]]*\]', '', s)
 
     # Look at the size of this thing!!!
-    text = re.sub(r'\s+(({[^{}]*})|(\([^()]*\))|(\[[^\[\]]*\]))', '', text)
-
-    # Collapse to ASCII where possible
-    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode()
-
-    return text
+    return re.sub(r'\s+(({[^{}]*})|(\([^()]*\))|(\[[^\[\]]*\]))', '', s)
 
 
 if __name__ == "__main__":

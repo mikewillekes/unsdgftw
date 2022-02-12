@@ -18,7 +18,6 @@ class ParagraphMetadata:
     page_number: int
     paragraph_number: int
     paragraph_len: int
-    keywords: List[str]
     clean_text: str
     raw_text: str
 
@@ -26,7 +25,7 @@ class ParagraphMetadata:
 def load_metadata(filename):
     # Deserialized from Jsonl file
     metadata = []
-    with (filename, 'r') as fp:
+    with open(filename, 'r') as fp:
         for line in fp.readlines():
             metadata.append(from_json(ParagraphMetadata, line.strip()))
     return metadata
