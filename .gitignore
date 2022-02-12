@@ -1,3 +1,14 @@
+# Text Corpus. Keep root metadata files,
+# but ignore all binary and NLP cleaning
+corpus/IPBES/**
+!corpus/IPBES/metadata.json
+
+corpus/IPCC/**
+!corpus/IPCC/metadata.json
+
+# Binary files
+bin/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
