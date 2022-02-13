@@ -1,13 +1,14 @@
-import document_metadata
-from document_metadata import DocumentMetadata
-import config
 from datetime import date
+
+# Local application imports
+from metadata.document_metadata import *
+from config import config
 
 
 document_collection_name = 'IUCN'
 filename = f'{config.CORPUS_DIR}/{document_collection_name}/{config.DOCUMENT_METADATA_FILENAME}'
 
-document_metadata.save_metadata(filename, 
+save_document_metadata(filename, 
     [
         DocumentMetadata(
             'iucn.org',

@@ -24,3 +24,14 @@ CLEANTEXT_EXTENSION = '.jsonl'
 # Ignore Paragraphs shorter than
 NLP_MIN_PARAGRAPH_LENGTH = 200
 
+
+def get_document_metadata_filename(document_collection_name):
+    return f'{CORPUS_DIR}/{document_collection_name}/{DOCUMENT_METADATA_FILENAME}'
+
+
+def get_document_xhtml_filename(document_collection_name, local_document_filename):
+    return f'{CORPUS_DIR}/{document_collection_name}/{TEXT_DIR}/{local_document_filename}{TEXT_EXTENSION}'
+
+
+def get_paragraph_metadata_filename(document_collection_name, local_document_filename):
+    return f'{CORPUS_DIR}/{document_collection_name}/{CLEANTEXT_DIR}/{local_document_filename}{CLEANTEXT_EXTENSION}'

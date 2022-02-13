@@ -1,41 +1,31 @@
-from distutils.command.config import config
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
 import dataclasses
 import re
 import json
 import unicodedata
-import document_metadata
-import config
-import paragraph_metadata
-from paragraph_metadata import ParagraphMetadata
 
-""" Read a DocumentMetadata and extract cleared Paragraphs + ParagraphMetadata ready for NLP
-"""
-def main():
-    clean_document_collection('IPBES')
-    clean_document_collection('IUCN')
+# Local application imports
+from metadata.document_metadata import *
+from metadata.paragraph_metadata import *
+from config import config
 
 
 def clean_document_collection(document_collection_name):
 
-    print('====================')
-    document_metadata_filename = f'{config.CORPUS_DIR}/{document_collection_name}/{config.DOCUMENT_METADATA_FILENAME}'
-    print(f'Cleaning document collection: {document_collection_name}')
-    documents = document_metadata.load_metadata(document_metadata_filename)
+    document_metadata_filename = config.get_document_metadata_filename(document_collection_name)
+    documents = load_document_metadata(document_metadata_filename)
     
     for document in documents:
-        paragraph_metadata_filename =  f'{config.CORPUS_DIR}/{document_collection_name}/{config.CLEANTEXT_DIR}/{document.local_filename}{config.CLEANTEXT_EXTENSION}'
+        paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
         paragraphs = clean_xhtml_document(document_collection_name, document)
-        paragraph_metadata.save_metadata(paragraph_metadata_filename, paragraphs)
+        save_paragraph_metadata(paragraph_metadata_filename, paragraphs)
    
 
 def clean_xhtml_document(document_collection_name, document):
 
-    xhtml_filename = f'{config.CORPUS_DIR}/{document_collection_name}/{config.TEXT_DIR}/{document.local_filename}{config.TEXT_EXTENSION}'
-    print('')
-    print(document.title)
-    print(xhtml_filename, end='')
+    xhtml_filename = config.get_document_xhtml_filename(document_collection_name, document.local_filename)
+    print(f'\n{document_collection_name} >> {document.title} >> {xhtml_filename} ', end='')
 
     result = []
 
@@ -115,7 +105,3 @@ def clean_parentheses(s):
 
     # Look at the size of this thing!!!
     return re.sub(r'\s+(({[^{}]*})|(\([^()]*\))|(\[[^\[\]]*\]))', '', s)
-
-
-if __name__ == "__main__":
-    main()

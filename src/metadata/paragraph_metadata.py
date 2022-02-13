@@ -22,7 +22,7 @@ class ParagraphMetadata:
     raw_text: str
 
 
-def load_metadata(filename):
+def load_paragraph_metadata(filename):
     # Deserialized from Jsonl file
     metadata = []
     with open(filename, 'r') as fp:
@@ -31,7 +31,7 @@ def load_metadata(filename):
     return metadata
 
 
-def save_metadata(filename, metadata):
+def save_paragraph_metadata(filename, metadata):
     # Serialize to json string & append newline
     lines = []
     for m in metadata:
