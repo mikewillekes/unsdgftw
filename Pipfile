@@ -7,9 +7,12 @@ verify_ssl = true
 
 [packages]
 beautifulsoup4 = "*"
-spacy = "*"
+spacy = {extras = ["cuda113", "transformers"], version = "*"}
 pyserde = "*"
 jupyter = "*"
+transformers = "*"
+tensorflow-gpu = "*"
+sentence-transformers = "*"
 
 [requires]
 python_version = "3.8"

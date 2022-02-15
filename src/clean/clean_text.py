@@ -4,11 +4,19 @@ import dataclasses
 import re
 import json
 import unicodedata
+import spacy
 
 # Local application imports
 from metadata.document_metadata import *
 from metadata.paragraph_metadata import *
 from config import config
+
+# Load Transformer model via Spacy
+nlp = spacy.load('en_core_web_trf')
+is_using_gpu = spacy.prefer_gpu()
+print (f'Using GPU: {is_using_gpu}')
+
+ENTITY_TYPES = ['EVENT', 'FAC', 'GPE', 'LANGUAGE', 'LAW', 'LOC', 'NORP', 'ORG', 'PERSON', 'PRODUCT', 'WORK_OF_ART']
 
 
 def clean_document_collection(document_collection_name):
@@ -40,19 +48,38 @@ def clean_xhtml_document(document_collection_name, document):
                     clean_text = clean_parentheses(raw_text)
 
                     if len(clean_text) > config.NLP_MIN_PARAGRAPH_LENGTH:
+
+                        # Spacy Pipeline
+                        nlp_doc = nlp(clean_text)
+                        sentences = [sentence.text for sentence in nlp_doc.sents]
+                        entities = [(ent.text, ent.label_) for ent in nlp_doc.ents if ent.label_ in ENTITY_TYPES]
+
+                        # if nlp_doc.sents:
+                        #     for sent in nlp_doc.sents:
+                        #         print(f'{sent.text}')
+
+
+                        # if nlp_doc.ents:
+                        #     for ent in nlp_doc.ents:
+                        #         if ent.label_ in ENTITY_TYPES:
+                        #             print(f'{ent.text} >> {ent.label_} ({spacy.explain(ent.label_)})')
+
+
+
                         result.append(ParagraphMetadata(
                             document.organization,
                             document.local_filename,
                             document.about_url,
                             document.download_url,
                             document.title,
-                            document.summary,
                             document.year,
                             page_number,
                             paragraph_number,
                             len(clean_text),
                             clean_text=clean_text,
-                            raw_text=raw_text))
+                            raw_text=raw_text,
+                            sentences=sentences,
+                            entities=entities))
 
     print('')
     return result
@@ -105,3 +132,28 @@ def clean_parentheses(s):
 
     # Look at the size of this thing!!!
     return re.sub(r'\s+(({[^{}]*})|(\([^()]*\))|(\[[^\[\]]*\]))', '', s)
+
+
+def util_print_ner_types(nlp):
+    # en_core_web_trf has:
+    #
+    # CARDINAL Numerals that do not fall under another type
+    # DATE Absolute or relative dates or periods
+    # EVENT Named hurricanes, battles, wars, sports events, etc.
+    # FAC Buildings, airports, highways, bridges, etc.
+    # GPE Countries, cities, states
+    # LANGUAGE Any named language
+    # LAW Named documents made into laws.
+    # LOC Non-GPE locations, mountain ranges, bodies of water
+    # MONEY Monetary values, including unit
+    # NORP Nationalities or religious or political groups
+    # ORDINAL "first", "second", etc.
+    # ORG Companies, agencies, institutions, etc.
+    # PERCENT Percentage, including "%"
+    # PERSON People, including fictional
+    # PRODUCT Objects, vehicles, foods, etc. (not services)
+    # QUANTITY Measurements, as of weight or distance
+    # TIME Times smaller than a day
+    # WORK_OF_ART Titles of books, songs, etc.
+    for label in nlp.get_pipe('ner').labels:
+        print(f'{label} {spacy.explain(label)}')

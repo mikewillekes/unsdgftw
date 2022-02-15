@@ -2,7 +2,9 @@ from datetime import date
 from serde import serialize, deserialize
 from serde.json import from_json, to_json
 from dataclasses import dataclass
+from typing import List, Tuple
 
+Entity = Tuple[str, str]
 
 @deserialize
 @serialize
@@ -13,14 +15,14 @@ class ParagraphMetadata:
     about_url: str
     download_url: str
     title: str
-    summary: str
     year: date
     page_number: int
     paragraph_number: int
     paragraph_len: int
     clean_text: str
     raw_text: str
-
+    sentences: List[str]
+    entities: List[Entity]
 
 def load_paragraph_metadata(filename):
     # Deserialized from Jsonl file
