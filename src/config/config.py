@@ -8,8 +8,9 @@ CLEANTEXT_DIR = '3-cleantext'
 NLP_DIR = '4-nlp'
 
 # =========================
-# Filenames
+# Other Pathnames and Filenames
 DOCUMENT_METADATA_FILENAME = 'metadata.jsonl'
+SDGS = f'{CORPUS_DIR}/resources/Sustainable Development Goals Feb 2022.csv'
 
 # =========================
 # File extensions
