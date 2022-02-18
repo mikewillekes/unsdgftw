@@ -18,8 +18,9 @@ class SustainableDevelopmentGoal:
     goal_num: str
     goal: str
 
+def load_sdgs():
+    """Load the full set of all SDGs"""
 
-def loadSDGS():
     sdgs = []
     
     # This CSV file was generated in Excel. It's utf-8 with a BOM (byte-order-mark)
@@ -42,7 +43,7 @@ def loadSDGS():
 
 
 def main(): 
-    for goal in loadSDGS():
+    for goal in load_sdgs():
         print(f'{goal.goal_num} >> {goal.goal}')
 
 
