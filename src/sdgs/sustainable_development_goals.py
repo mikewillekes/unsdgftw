@@ -26,7 +26,7 @@ def load_sdgs():
     # This CSV file was generated in Excel. It's utf-8 with a BOM (byte-order-mark)
     # so we need to specify the correct encoding.
     # See: https://stackoverflow.com/a/60614459
-    with codecs.open(config.SDGS, 'r', encoding='utf-8-sig') as fp:
+    with codecs.open(config.SDGS_FILENAME, 'r', encoding='utf-8-sig') as fp:
         reader = DictReader(fp)
         for record in reader:
             sdgs.append(

@@ -9,14 +9,19 @@ import spacy
 # Local application imports
 from metadata.document_metadata import *
 from metadata.paragraph_metadata import *
+from clean.phrase_matcher import initialize_phrase_matcher
 from config import config
+from metadata import paragraph_metadata
 
 # Load Transformer model via Spacy
 nlp = spacy.load('en_core_web_trf')
+matcher = initialize_phrase_matcher(nlp)
 is_using_gpu = spacy.prefer_gpu()
 print (f'Using GPU: {is_using_gpu}')
 
+# NER Entity types from the Spacy 'en_core_web_trf' model
 ENTITY_TYPES = ['EVENT', 'FAC', 'GPE', 'LANGUAGE', 'LAW', 'LOC', 'NORP', 'ORG', 'PERSON', 'PRODUCT', 'WORK_OF_ART']
+
 
 def main():
     clean_document_collection('IUCN')
@@ -57,7 +62,7 @@ def clean_xhtml_document(document_collection_name, document):
         # Split into Pages and process each page
         #
         for page_number, page in enumerate(soup.find_all('div', class_='page')):
-            #print('.', end='')
+            print('.', end='')
             
             #
             # Split into Paragraphs and process each paragraph
@@ -77,7 +82,12 @@ def clean_xhtml_document(document_collection_name, document):
                         # Process the previous paragraph and start a new chunk.
                         #
                         if (current_chunk_page_number > 0 and current_chunk_paragraph_number > 0):
-                            result.append(process_chunk(document, current_chunk_page_number, current_chunk_paragraph_number, current_chunk_paragraph_text))
+                            current_result = process_chunk(document, current_chunk_page_number, current_chunk_paragraph_number, current_chunk_paragraph_text)
+                            if current_result:
+                                result.append(current_result)
+
+                        # This means that a paragraphs that spans multiple pages will 
+                        # be recorded as the Page Number and Paragraph Number of the first chunk        
                         current_chunk_page_number = page_number
                         current_chunk_paragraph_number = paragraph_number
                         current_chunk_paragraph_text = raw_text
@@ -170,6 +180,11 @@ def process_chunk(document, page_number, paragraph_number, paragraph_text):
         nlp_doc = nlp(clean_text)
         sentences = [sentence.text for sentence in nlp_doc.sents]
         entities = [(ent.text, ent.label_) for ent in nlp_doc.ents if ent.label_ in ENTITY_TYPES]
+        
+        # Match specific keyword/phrases from <resources/MatchPhrases.txt>
+        # A quick-and-dirty way to capture rules-based entities without complex ML training
+        matches = matcher(nlp_doc)
+        phrase_matches = [nlp_doc[start:end].text for match_id, start, end in matches]
 
         # if nlp_doc.sents:
         #     for sent in nlp_doc.sents:
@@ -180,8 +195,7 @@ def process_chunk(document, page_number, paragraph_number, paragraph_text):
         #     for ent in nlp_doc.ents:
         #         if ent.label_ in ENTITY_TYPES:
         #             print(f'{ent.text} >> {ent.label_} ({spacy.explain(ent.label_)})')
-
-        print(f'PAGE {page_number}, PARA {paragraph_number} : <p>{clean_text}</p>')
+        # print(f'PAGE {page_number}, PARA {paragraph_number} : <p>{clean_text}</p>')
 
         return ParagraphMetadata(
             document.organization,
@@ -196,7 +210,8 @@ def process_chunk(document, page_number, paragraph_number, paragraph_text):
             clean_text=clean_text,
             raw_text=paragraph_text,
             sentences=sentences,
-            entities=entities)
+            entities=entities,
+            phrase_matches=phrase_matches)
 
 
 def util_print_ner_types(nlp):

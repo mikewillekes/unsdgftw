@@ -23,6 +23,7 @@ class ParagraphMetadata:
     raw_text: str
     sentences: List[str]
     entities: List[Entity]
+    phrase_matches: List[str]
 
 def load_paragraph_metadata(filename):
     # Deserialized from Jsonl file
