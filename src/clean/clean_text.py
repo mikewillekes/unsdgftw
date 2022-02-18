@@ -18,6 +18,9 @@ print (f'Using GPU: {is_using_gpu}')
 
 ENTITY_TYPES = ['EVENT', 'FAC', 'GPE', 'LANGUAGE', 'LAW', 'LOC', 'NORP', 'ORG', 'PERSON', 'PRODUCT', 'WORK_OF_ART']
 
+def main():
+    clean_document_collection('IUCN')
+
 
 def clean_document_collection(document_collection_name):
 
@@ -39,47 +42,52 @@ def clean_xhtml_document(document_collection_name, document):
 
     with open(xhtml_filename) as fin:
         soup = BeautifulSoup(fin, 'html.parser')
+
+        # 
+        # We iterated page-by-page, but paragraphs span mulitiple pages.
+        # Based on some simple rules we stitch-together mulitple paragraphs
+        #
+        #  - If a paragraph begins with a lowercase letter, append it to the prev. paragraph
+        #
+        current_chunk_page_number = 0
+        current_chunk_paragraph_number = 0
+        current_chunk_paragraph_text = ''
+
+        #
+        # Split into Pages and process each page
+        #
         for page_number, page in enumerate(soup.find_all('div', class_='page')):
-            print('.', end='')
+            #print('.', end='')
+            
+            #
+            # Split into Paragraphs and process each paragraph
+            #
             for paragraph_number, paragraph in enumerate(page.find_all('p')):
 
                 if paragraph.text:
                     raw_text = normalize_unicode(normalize_whitespace(paragraph.text))
-                    clean_text = clean_parentheses(raw_text)
+                    
+                    if not raw_text:
+                        continue
+                    
+                    if  raw_text[0].isupper() or raw_text[0].isdigit():
+                        
+                        #
+                        # A new paragraph beginning with a Capital letter or Number. 
+                        # Process the previous paragraph and start a new chunk.
+                        #
+                        if (current_chunk_page_number > 0 and current_chunk_paragraph_number > 0):
+                            result.append(process_chunk(document, current_chunk_page_number, current_chunk_paragraph_number, current_chunk_paragraph_text))
+                        current_chunk_page_number = page_number
+                        current_chunk_paragraph_number = paragraph_number
+                        current_chunk_paragraph_text = raw_text
 
-                    if len(clean_text) > config.NLP_MIN_PARAGRAPH_LENGTH:
-
-                        # Spacy Pipeline
-                        nlp_doc = nlp(clean_text)
-                        sentences = [sentence.text for sentence in nlp_doc.sents]
-                        entities = [(ent.text, ent.label_) for ent in nlp_doc.ents if ent.label_ in ENTITY_TYPES]
-
-                        # if nlp_doc.sents:
-                        #     for sent in nlp_doc.sents:
-                        #         print(f'{sent.text}')
-
-
-                        # if nlp_doc.ents:
-                        #     for ent in nlp_doc.ents:
-                        #         if ent.label_ in ENTITY_TYPES:
-                        #             print(f'{ent.text} >> {ent.label_} ({spacy.explain(ent.label_)})')
-
-
-
-                        result.append(ParagraphMetadata(
-                            document.organization,
-                            document.local_filename,
-                            document.about_url,
-                            document.download_url,
-                            document.title,
-                            document.year,
-                            page_number,
-                            paragraph_number,
-                            len(clean_text),
-                            clean_text=clean_text,
-                            raw_text=raw_text,
-                            sentences=sentences,
-                            entities=entities))
+                    else:
+                        
+                        #
+                        # Likely this is a continuation of the previous paragraph
+                        #
+                        current_chunk_paragraph_text = current_chunk_paragraph_text + ' ' + raw_text
 
     print('')
     return result
@@ -134,6 +142,63 @@ def clean_parentheses(s):
     return re.sub(r'\s+(({[^{}]*})|(\([^()]*\))|(\[[^\[\]]*\]))', '', s)
 
 
+def process_chunk(document, page_number, paragraph_number, paragraph_text):
+
+    clean_text = clean_parentheses(paragraph_text)
+
+    # Discarding very short paragraphs could mean that we throw away some
+    # headlines and fragments of sentences - but it's more important that we 
+    # are generally cleaning and discarding junk like:
+    #
+    #    <div class="page"><p />
+    #    <p>C
+    #    O
+    #    </p>
+    #    <p>U
+    #    N
+    #    </p>
+    #    <p>TR
+    #    Y
+    #    </p>
+    #    <p>G
+    #    en
+    #    </p>
+    #
+    if len(clean_text) > config.NLP_MIN_PARAGRAPH_LENGTH:
+
+        # Spacy Pipeline
+        nlp_doc = nlp(clean_text)
+        sentences = [sentence.text for sentence in nlp_doc.sents]
+        entities = [(ent.text, ent.label_) for ent in nlp_doc.ents if ent.label_ in ENTITY_TYPES]
+
+        # if nlp_doc.sents:
+        #     for sent in nlp_doc.sents:
+        #         print(f'{sent.text}')
+
+
+        # if nlp_doc.ents:
+        #     for ent in nlp_doc.ents:
+        #         if ent.label_ in ENTITY_TYPES:
+        #             print(f'{ent.text} >> {ent.label_} ({spacy.explain(ent.label_)})')
+
+        print(f'PAGE {page_number}, PARA {paragraph_number} : <p>{clean_text}</p>')
+
+        return ParagraphMetadata(
+            document.organization,
+            document.local_filename,
+            document.about_url,
+            document.download_url,
+            document.title,
+            document.year,
+            page_number,
+            paragraph_number,
+            len(clean_text),
+            clean_text=clean_text,
+            raw_text=paragraph_text,
+            sentences=sentences,
+            entities=entities)
+
+
 def util_print_ner_types(nlp):
     # en_core_web_trf has:
     #
@@ -157,3 +222,7 @@ def util_print_ner_types(nlp):
     # WORK_OF_ART Titles of books, songs, etc.
     for label in nlp.get_pipe('ner').labels:
         print(f'{label} {spacy.explain(label)}')
+
+
+if __name__ == "__main__":
+    main()
