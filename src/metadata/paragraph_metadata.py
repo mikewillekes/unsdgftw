@@ -19,6 +19,7 @@ class ParagraphMetadata:
     page_number: int
     paragraph_number: int
     paragraph_len: int
+    prose_score: float
     clean_text: str
     raw_text: str
     sentences: List[str]

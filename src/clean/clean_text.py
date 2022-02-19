@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
+from collections import Counter
 import dataclasses
 import re
 import json
@@ -152,7 +153,45 @@ def clean_parentheses(s):
     return re.sub(r'\s+(({[^{}]*})|(\([^()]*\))|(\[[^\[\]]*\]))', '', s)
 
 
+def calculate_prose_score(nlp_doc):
+
+    """
+        We want to be able to identify paragraphs of unstructured prose that are good candidates
+        for sentence segmentation and NLP.
+        This is a simple, rules-based way to use Part-of-Speech tagging and simple hueristics to identify
+
+        a paragraph that is likely a references block:
+
+            Powell, B., Thilsted, S. H., Ickowitz, A., Termote, C., Sunderland, T., & Herforth, A.. Improving diets with wild and
+            cultivated biodiversity from across the landscape. Food Security, 7(3), 535554.
+            https://doi.org/10.1007/s12571- 015-0466-5
+            Counter({'PUNCT': 17, 'PROPN': 15, 'NUM': 7, 'NOUN': 3, 'ADP': 3, 'CCONJ': 2, 'ADJ': 2, 'VERB': 1, 'DET': 1, 'X': 1})
+
+        vs.
+
+            Chapter 3 addresses the questions of How much progress has been made towards the Aichi Biodiversity Targets and the
+            objectives of other biodiversity-related agreements, and how do nature and its contributions to people contribute to
+            the implementation of the Sustainable Development Goals? Building upon findings from chapter 2 and additional evidence
+            from analyses of indicators and literature reviews, the chapter assesses progress towards meeting major international
+            objectives related to biodiversity and sustainable development, with special attention given to the Aichi Biodiversity
+            Targets and to relevant Sustainable Development Goals. The chapter also examines the objectives of other biodiversity-
+            related agreements: Convention on Migratory Species, Convention on International Trade in Endangered Species, Ramsar
+            Convention on Wetlands, Convention to Combat Desertification, World Heritage Convention, International Plant Protection
+            Convention, Convention on the Conservation of
+            Counter({'PROPN': 34, 'NOUN': 27, 'ADP': 21, 'PUNCT': 13, 'VERB': 12, 'DET': 10, 'ADJ': 9, 'CCONJ': 7, 'SCONJ': 3, 'AUX': 3, 'NUM': 2, 'PRON': 1, 'ADV': 1, 'PART': 1})
+
+        Apply POS Tagging and then look at the ratio of PUNCT and PROPN to count of tokens.   
+    """
+    pos_tokens = [token.pos_ for token in nlp_doc] 
+    counter = Counter(pos_tokens)
+    score = 1 - (counter['PROPN'] + counter['PUNCT']) / len(pos_tokens)
+    return score
+
+
 def process_chunk(document, page_number, paragraph_number, paragraph_text):
+    """
+        return None if the chunk is skipped (i.e. too short, poor-quality text) 
+    """
 
     clean_text = clean_parentheses(paragraph_text)
 
@@ -167,51 +206,56 @@ def process_chunk(document, page_number, paragraph_number, paragraph_text):
     #    <p>U
     #    N
     #    </p>
-    #    <p>TR
-    #    Y
-    #    </p>
-    #    <p>G
-    #    en
-    #    </p>
     #
-    if len(clean_text) > config.NLP_MIN_PARAGRAPH_LENGTH:
+    if len(clean_text) <= config.NLP_MIN_PARAGRAPH_LENGTH:
+        return None
 
-        # Spacy Pipeline
-        nlp_doc = nlp(clean_text)
-        sentences = [sentence.text for sentence in nlp_doc.sents]
-        entities = [(ent.text, ent.label_) for ent in nlp_doc.ents if ent.label_ in ENTITY_TYPES]
-        
-        # Match specific keyword/phrases from <resources/MatchPhrases.txt>
-        # A quick-and-dirty way to capture rules-based entities without complex ML training
-        matches = matcher(nlp_doc)
-        phrase_matches = [nlp_doc[start:end].text for match_id, start, end in matches]
+    # Spacy Pipeline
+    nlp_doc = nlp(clean_text)
 
-        # if nlp_doc.sents:
-        #     for sent in nlp_doc.sents:
-        #         print(f'{sent.text}')
+    # Check for density of Prose in the paragraph
+    prose_score = calculate_prose_score(nlp_doc)
+    # if not is_prose(nlp_doc):
+    #     return None
+
+    #
+    # Process result of NLP pipeline
+    # 
+    sentences = [sentence.text for sentence in nlp_doc.sents if len(sentence) > config.NLP_MIN_SENTENCE_LENGTH]
+    entities = [(ent.text, ent.label_) for ent in nlp_doc.ents if ent.label_ in ENTITY_TYPES]
+    
+    # Match specific keyword/phrases from <resources/MatchPhrases.txt>
+    # A quick-and-dirty way to capture rules-based entities without complex ML training
+    matches = matcher(nlp_doc)
+    phrase_matches = [nlp_doc[start:end].text for match_id, start, end in matches]
+
+    # if nlp_doc.sents:
+    #     for sent in nlp_doc.sents:
+    #         print(f'{sent.text}')
 
 
-        # if nlp_doc.ents:
-        #     for ent in nlp_doc.ents:
-        #         if ent.label_ in ENTITY_TYPES:
-        #             print(f'{ent.text} >> {ent.label_} ({spacy.explain(ent.label_)})')
-        # print(f'PAGE {page_number}, PARA {paragraph_number} : <p>{clean_text}</p>')
+    # if nlp_doc.ents:
+    #     for ent in nlp_doc.ents:
+    #         if ent.label_ in ENTITY_TYPES:
+    #             print(f'{ent.text} >> {ent.label_} ({spacy.explain(ent.label_)})')
+    # print(f'PAGE {page_number}, PARA {paragraph_number} : <p>{clean_text}</p>')
 
-        return ParagraphMetadata(
-            document.organization,
-            document.local_filename,
-            document.about_url,
-            document.download_url,
-            document.title,
-            document.year,
-            page_number,
-            paragraph_number,
-            len(clean_text),
-            clean_text=clean_text,
-            raw_text=paragraph_text,
-            sentences=sentences,
-            entities=entities,
-            phrase_matches=phrase_matches)
+    return ParagraphMetadata(
+        document.organization,
+        document.local_filename,
+        document.about_url,
+        document.download_url,
+        document.title,
+        document.year,
+        page_number,
+        paragraph_number,
+        len(clean_text),
+        prose_score=prose_score,
+        clean_text=clean_text,
+        raw_text=paragraph_text,
+        sentences=sentences,
+        entities=entities,
+        phrase_matches=phrase_matches)
 
 
 def util_print_ner_types(nlp):

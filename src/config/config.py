@@ -23,8 +23,10 @@ CLEANTEXT_EXTENSION = '.jsonl'
 # =========================
 # NLP Pipeline Vars
 
-# Ignore Paragraphs shorter than
+# Ignore Paragraphs shorter than (Characters)
 NLP_MIN_PARAGRAPH_LENGTH = 100
+# Ignore Sentences shorter than (Characters)
+NLP_MIN_SENTENCE_LENGTH = 30
 
 
 def get_document_metadata_filename(document_collection_name):
