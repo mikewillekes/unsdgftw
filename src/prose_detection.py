@@ -4,6 +4,7 @@ from collections import Counter
 
 texts = [
     'Potts, S. G., Imperatriz-Fonseca, V., Ngo, H. T., Aizen, M. A., Biesmeijer, J. C., Breeze, T. D., Dicks, L. V., Garibaldi, L. A., Hill, R., Settele, J., & Vanbergen, A. J.. Safeguarding pollinators and their values to human well-being. Nature, 540(7632), 220229. https://doi. org/10.1038/nature20588',
+    'Imperatriz-Fonseca, V., Safeguarding pollinators and their values to human well-being. Nature, 540(7632), 220229',
     'Powell, B., Thilsted, S. H., Ickowitz, A., Termote, C., Sunderland, T., & Herforth, A.. Improving diets with wild and cultivated biodiversity from across the landscape. Food Security, 7(3), 535554. https://doi.org/10.1007/s12571- 015-0466-5',
     'Johnson, H. E., Banack, S. A., & Cox, P. A.. Variability in Content of the Anti-AIDS Drug Candidate Prostratin in Samoan Populations of Homalanthus nutans. Journal of Natural Products, 71(12), 2041-2044, doi:10.1021/np800295m.',
     'Foley, J. A., DeFries, R., Asner, G. P., Barford, C., Bonan, G., Carpenter, S. R., Chapin, F. S., Coe, M. T., Daily, G. C., Gibbs, H. K., Helkowski, J. H., Holloway, T., Howard, E. A., Kucharik, C. J., Monfreda, C., Patz, J. A., Prentice, I. C., Ramankutty, N., & Snyder, P. K.. Global consequences of land use. Science, 309(5734), 570574. https://doi. org/10.1126/science.1111772',
@@ -56,9 +57,19 @@ for text in texts:
     counter = Counter(pos_tokens)
 
     print(text)
+    print(pos_tokens)
     print(counter)
     print(f'text:{len(text)}\t PROPN:{counter["PROPN"]}\t PUNCT:{counter["PUNCT"]}\t total tokens:{len(pos_tokens)}')
 
+    # Score = ratio of Proper Nouns & Punct to all tokens
     score = 1 - (counter['PROPN'] + counter['PUNCT']) / len(pos_tokens)
     print(score)
     
+    #
+    # Calculate weighted (by length of string) average position of PROPN.
+    # If Proper Nouns tend to occur in the first half of the string then
+    # likely this string is a collection of endnote references
+    #
+    positions = [index for index, token in enumerate(nlp_doc) if token.pos_ in ['PROPN']]
+    average_position = (sum(positions) / len(positions)) / len(pos_tokens)
+    print(average_position)

@@ -153,7 +153,7 @@ def clean_parentheses(s):
     return re.sub(r'\s+(({[^{}]*})|(\([^()]*\))|(\[[^\[\]]*\]))', '', s)
 
 
-def calculate_prose_score(nlp_doc):
+def is_prose(nlp_doc):
 
     """
         We want to be able to identify paragraphs of unstructured prose that are good candidates
@@ -184,8 +184,29 @@ def calculate_prose_score(nlp_doc):
     """
     pos_tokens = [token.pos_ for token in nlp_doc] 
     counter = Counter(pos_tokens)
+
+    # Score = ratio of Proper Nouns & Punct to all tokens
     score = 1 - (counter['PROPN'] + counter['PUNCT']) / len(pos_tokens)
-    return score
+    
+    #
+    # Calculate weighted (by length of string) average position of PROPN.
+    # If Proper Nouns tend to occur in the first half of the string then
+    # likely this string is a collection of endnote references
+    #
+    positions = [index for index, token in enumerate(nlp_doc) if token.pos_ in ['PROPN']]
+    if len(positions) == 0:
+        # no proper nouns
+        return True
+
+    average_position = (sum(positions) / len(positions)) / len(pos_tokens)
+
+    if score < 0.6 and average_position < 0.5:
+        # Not Prose
+        return False
+    else:
+        # Yes Prose
+        return True
+
 
 
 def process_chunk(document, page_number, paragraph_number, paragraph_text):
@@ -214,9 +235,8 @@ def process_chunk(document, page_number, paragraph_number, paragraph_text):
     nlp_doc = nlp(clean_text)
 
     # Check for density of Prose in the paragraph
-    prose_score = calculate_prose_score(nlp_doc)
-    # if not is_prose(nlp_doc):
-    #     return None
+    if not is_prose(nlp_doc):
+        return None
 
     #
     # Process result of NLP pipeline
@@ -250,7 +270,6 @@ def process_chunk(document, page_number, paragraph_number, paragraph_text):
         page_number,
         paragraph_number,
         len(clean_text),
-        prose_score=prose_score,
         clean_text=clean_text,
         raw_text=paragraph_text,
         sentences=sentences,
