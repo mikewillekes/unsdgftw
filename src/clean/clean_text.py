@@ -268,12 +268,8 @@ def process_chunk(document, page_number, paragraph_number, paragraph_text):
     # print(f'PAGE {page_number}, PARA {paragraph_number} : <p>{clean_text}</p>')
 
     return ParagraphMetadata(
-        document.organization,
-        document.local_filename,
-        document.about_url,
-        document.download_url,
-        document.title,
-        document.year,
+        generate_paragraph_id(document.id, page_number, paragraph_number),
+        document.id,
         page_number,
         paragraph_number,
         len(clean_text),

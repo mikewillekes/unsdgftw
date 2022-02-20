@@ -10,12 +10,8 @@ Entity = Tuple[str, str]
 @serialize
 @dataclass
 class ParagraphMetadata:
-    organization: str
-    local_filename: str
-    about_url: str
-    download_url: str
-    title: str
-    year: date
+    id: str
+    document_id: str
     page_number: int
     paragraph_number: int
     paragraph_len: int
@@ -24,6 +20,14 @@ class ParagraphMetadata:
     sentences: List[str]
     entities: List[Entity]
     phrase_matches: List[str]
+
+
+def generate_paragraph_id(document_id, page_number, paragraph_number):
+    """
+        Generate a unique id for the paragraph.
+    """
+    return f'{document_id}.{page_number}.{paragraph_number}'
+
 
 def load_paragraph_metadata(filename):
     # Deserialized from Jsonl file
