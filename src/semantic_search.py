@@ -9,7 +9,7 @@ import torch
 
 embedder = SentenceTransformer('all-MiniLM-L6-v2')
 
-document_collection_name = 'IPBES'
+document_collection_name = 'MA'
 
 document_metadata_filename = config.get_document_metadata_filename(document_collection_name)
 documents = load_document_metadata(document_metadata_filename)

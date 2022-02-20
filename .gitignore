@@ -9,6 +9,9 @@ corpus/IPCC/**
 corpus/IUCN/**
 !corpus/IUCN/metadata.jsonl
 
+corpus/MA/**
+!corpus/MA/metadata.jsonl
+
 # Binary files
 bin/
 
