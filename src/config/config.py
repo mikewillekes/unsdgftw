@@ -25,8 +25,13 @@ CLEANTEXT_EXTENSION = '.jsonl'
 
 # Ignore Paragraphs shorter than (Characters)
 NLP_MIN_PARAGRAPH_LENGTH = 100
+
 # Ignore Sentences shorter than (Characters)
 NLP_MIN_SENTENCE_LENGTH = 30
+
+# Max number of pages to process per document (helpful to speed things
+# up during developement). There are some 3000+ page docs in the corpus!
+MAX_PAGES_PER_DOCUMENT = 20
 
 
 def get_document_metadata_filename(document_collection_name):

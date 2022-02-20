@@ -63,6 +63,11 @@ def clean_xhtml_document(document_collection_name, document):
         # Split into Pages and process each page
         #
         for page_number, page in enumerate(soup.find_all('div', class_='page')):
+
+            # Guard againt very long documents during development
+            if page_number > config.MAX_PAGES_PER_DOCUMENT:
+                break
+
             print('.', end='')
             
             #
@@ -154,6 +159,8 @@ def clean_parentheses(s):
 
 
 def is_prose(nlp_doc):
+
+    # TODO: Turn this into a supervised ML model!
 
     """
         We want to be able to identify paragraphs of unstructured prose that are good candidates

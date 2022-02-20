@@ -11,6 +11,7 @@ filename = f'{config.CORPUS_DIR}/{document_collection_name}/{config.DOCUMENT_MET
 save_document_metadata(filename, 
     [
         DocumentMetadata(
+            generate_document_id('https://portals.iucn.org/library/sites/library/files/documents/RL-267-001-En.pdf'),
             'iucn.org',
             'RL-267-001-En.pdf',
             'https://portals.iucn.org/library/node/49295',
@@ -20,6 +21,7 @@ save_document_metadata(filename,
             date(2021, 1, 1)
         ),
         DocumentMetadata(
+            generate_document_id('https://portals.iucn.org/library/sites/library/files/documents/2021-043-En.pdf'),
             'iucn.org',
             '2021-043-En.pdf',
             'https://portals.iucn.org/library/node/49860',
@@ -29,6 +31,7 @@ save_document_metadata(filename,
             date(2021, 1, 1)
         ),
         DocumentMetadata(
+            generate_document_id('https://portals.iucn.org/library/sites/library/files/documents/2021-034-En.pdf'),
             'iucn.org',
             '2021-034-En.pdf',
             'https://portals.iucn.org/library/node/49777',
@@ -38,6 +41,7 @@ save_document_metadata(filename,
             date(2021, 1, 1)
         ),
         DocumentMetadata(
+            generate_document_id('https://portals.iucn.org/library/sites/library/files/documents/2021-035-En.pdf'),
             'iucn.org',
             '2021-035-En.pdf',
             'https://portals.iucn.org/library/node/49776',
@@ -47,6 +51,7 @@ save_document_metadata(filename,
             date(2021, 10, 29)
         ),
         DocumentMetadata(
+            generate_document_id('https://portals.iucn.org/library/sites/library/files/documents/2020-002-En-Summ.pdf'),
             'iucn.org',
             '2020-002-En-Summ.pdf',
             'https://portals.iucn.org/library/node/49850',
@@ -56,6 +61,7 @@ save_document_metadata(filename,
             date(2021, 12, 13)
         ),
         DocumentMetadata(
+            generate_document_id('https://portals.iucn.org/library/sites/library/files/documents/2021-042-En.pdf'),
             'iucn.org',
             '2021-042-En.pdf',
             'https://portals.iucn.org/library/node/49846',
@@ -65,6 +71,7 @@ save_document_metadata(filename,
             date(2021, 12, 2)
         ),
         DocumentMetadata(
+            generate_document_id('https://portals.iucn.org/library/sites/library/files/documents/2021-036-En.pdf'),
             'iucn.org',
             '2021-036-En.pdf',
             'https://portals.iucn.org/library/node/49779',

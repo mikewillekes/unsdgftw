@@ -11,6 +11,7 @@ filename = f'{config.CORPUS_DIR}/{document_collection_name}/{config.DOCUMENT_MET
 save_document_metadata(filename, 
     [
         DocumentMetadata(
+            generate_document_id('https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Full_Report.pdf'),
             'ipcc.ch',
             'IPCC_AR6_WGI_Full_Report.pdf',
             'https://www.ipcc.ch/report/ar6/wg1/',

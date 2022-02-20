@@ -11,6 +11,7 @@ filename = f'{config.CORPUS_DIR}/{document_collection_name}/{config.DOCUMENT_MET
 save_document_metadata(filename, 
     [
         DocumentMetadata(
+            generate_document_id('https://zenodo.org/record/3237393/files/ipbes_assessment_report_ldra_EN.pdf?download=1'),
             'ipbes.net',
             'ipbes_assessment_report_ldra_EN.pdf',
             'https://zenodo.org/record/3237393',
@@ -20,6 +21,7 @@ save_document_metadata(filename,
             date(2018, 3, 24)
         ),
         DocumentMetadata(
+            generate_document_id('https://zenodo.org/record/5657041/files/202111_2020%20IPBES%20GLOBAL%20REPORT_FULL_DIGITAL_NOV%202021.pdf?download=1'),
             'ipbes.net',
             '202111_2020 IPBES GLOBAL REPORT_FULL_DIGITAL_NOV 2021.pdf',
             'https://zenodo.org/record/5657041',

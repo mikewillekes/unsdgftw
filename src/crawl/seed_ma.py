@@ -11,6 +11,7 @@ filename = f'{config.CORPUS_DIR}/{document_collection_name}/{config.DOCUMENT_MET
 save_document_metadata(filename, 
     [
         DocumentMetadata(
+            generate_document_id('https://www.millenniumassessment.org/documents/document.429.aspx.pdf'),
             'Millennium Ecosystem Assessment (MA)',
             'document.429.aspx.pdf',
             'https://www.millenniumassessment.org/en/BoardStatement.html',
@@ -20,6 +21,7 @@ save_document_metadata(filename,
             date(2005, 1, 1)
         ),
         DocumentMetadata(
+            generate_document_id('https://www.millenniumassessment.org/documents/document.356.aspx.pdf'),
             'Millennium Ecosystem Assessment (MA)',
             'document.356.aspx.pdf',
             'https://www.millenniumassessment.org/en/Synthesis.html',
@@ -29,6 +31,7 @@ save_document_metadata(filename,
             date(2005, 1, 1)
         ),
         DocumentMetadata(
+            generate_document_id('https://www.millenniumassessment.org/documents/document.354.aspx.pdf'),
             'Millennium Ecosystem Assessment (MA)',
             'document.354.aspx.pdf',
             'https://www.millenniumassessment.org/en/Synthesis.html',
@@ -38,6 +41,7 @@ save_document_metadata(filename,
             date(2005, 1, 1)
         ),
         DocumentMetadata(
+            generate_document_id('https://www.millenniumassessment.org/documents/document.282.aspx.pdf'),
             'Millennium Ecosystem Assessment (MA)',
             'document.282.aspx.pdf',
             'https://www.millenniumassessment.org/en/Condition.html',
