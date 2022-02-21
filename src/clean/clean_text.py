@@ -278,7 +278,7 @@ def process_chunk(document, page_number, paragraph_number, paragraph_text):
     # Match specific keyword/phrases from <resources/MatchPhrases.txt>
     # A quick-and-dirty way to capture rules-based entities without complex ML training
     matches = matcher(nlp_doc)
-    phrase_matches = [nlp_doc[start:end].text for match_id, start, end in matches]
+    entities.extend([Entity(generate_entity_id(nlp_doc[start:end].text), nlp_doc[start:end].text, 'PHRASE') for match_id, start, end in matches])
 
     # if nlp_doc.sents:
     #     for sent in nlp_doc.sents:
@@ -300,8 +300,7 @@ def process_chunk(document, page_number, paragraph_number, paragraph_text):
         clean_text=clean_text,
         raw_text=paragraph_text,
         sentences=sentences,
-        entities=entities,
-        phrase_matches=phrase_matches)
+        entities=entities)
 
 
 def util_print_ner_types(nlp):

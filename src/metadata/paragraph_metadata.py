@@ -26,7 +26,6 @@ class ParagraphMetadata:
     raw_text: str
     sentences: List[str]
     entities: List[Entity]
-    phrase_matches: List[str]
 
 
 def generate_paragraph_id(document_id, page_number, paragraph_number):
