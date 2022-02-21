@@ -4,7 +4,14 @@ from serde.json import from_json, to_json
 from dataclasses import dataclass
 from typing import List, Tuple
 
-Entity = Tuple[str, str]
+@deserialize
+@serialize
+@dataclass
+class Entity:
+    id: str
+    text: str
+    label: str
+
 
 @deserialize
 @serialize

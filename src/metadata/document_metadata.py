@@ -22,7 +22,8 @@ class DocumentMetadata:
 def generate_document_id(download_url):
     """
         Generate a unique id for the document by normalizing and hashing 
-        the download_url field. Of course there's probably a more pythonic
+        the download_url field. Of course since there is already a 
+        DocumentMetadata class, there's probably a more pythonic
         way to do this with a class... but works for now.
     """
     s = download_url.lower()

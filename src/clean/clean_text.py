@@ -5,6 +5,9 @@ import dataclasses
 import re
 import json
 import unicodedata
+import hashlib
+
+# Spacy for NLP
 import spacy
 
 # Local application imports
@@ -119,6 +122,10 @@ def normalize_unicode(s):
     return unicodedata.normalize('NFKD', s).encode('ascii', 'ignore').decode()
 
 
+def remove_punctuation(s):
+    return re.sub(r'[^\w\s]', '', s)
+
+
 def clean_parentheses(s):
 
     # A lot of the source PDFs are academic papers - so have a lot of
@@ -156,6 +163,11 @@ def clean_parentheses(s):
 
     # Look at the size of this thing!!!
     return re.sub(r'\s+(({[^{}]*})|(\([^()]*\))|(\[[^\[\]]*\]))', '', s)
+
+
+def remove_stopwords(s):
+    tokens = [token for token in s.split() if token.lower() not in nlp.Defaults.stop_words]
+    return ' '.join(tokens)
 
 
 def is_prose(nlp_doc):
@@ -215,6 +227,18 @@ def is_prose(nlp_doc):
         return True
 
 
+def generate_entity_id(entity_text):
+    """
+        Generate a unique id for the document by normalizing and hashing 
+        the entity text field.
+    """
+    s = entity_text.lower()
+    s = remove_punctuation(s)
+    s = s.strip()
+    s = remove_stopwords(s.lower())
+    #print(f'{entity_text} >>> {s}')
+    return hashlib.sha256(s.encode('utf-8')).hexdigest()
+
 
 def process_chunk(document, page_number, paragraph_number, paragraph_text):
     """
@@ -249,7 +273,7 @@ def process_chunk(document, page_number, paragraph_number, paragraph_text):
     # Process result of NLP pipeline
     # 
     sentences = [sentence.text for sentence in nlp_doc.sents if len(sentence) > config.NLP_MIN_SENTENCE_LENGTH]
-    entities = [(ent.text, ent.label_) for ent in nlp_doc.ents if ent.label_ in ENTITY_TYPES]
+    entities = [Entity(generate_entity_id(ent.text), ent.text, ent.label_) for ent in nlp_doc.ents if ent.label_ in ENTITY_TYPES]
     
     # Match specific keyword/phrases from <resources/MatchPhrases.txt>
     # A quick-and-dirty way to capture rules-based entities without complex ML training
