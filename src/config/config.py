@@ -22,6 +22,7 @@ MATCH_PHRASES_FILENAME = f'{CORPUS_DIR}/resources/MatchPhrases.txt'
 # RAW_EXTENSION is excluded b/c it can be anything that TIKA can support parsing
 TEXT_EXTENSION = '.xml'
 CLEANTEXT_EXTENSION = '.jsonl'
+NLP_EXTENSION = '.jsonl'
 
 # =========================
 # NLP Pipeline Vars
@@ -34,7 +35,7 @@ NLP_MIN_SENTENCE_LENGTH = 30
 
 # Max number of pages to process per document (helpful to speed things
 # up during developement). There are some 3000+ page docs in the corpus!
-MAX_PAGES_PER_DOCUMENT = 20
+MAX_PAGES_PER_DOCUMENT = 100
 
 
 def get_document_metadata_filename(document_collection_name):
@@ -47,3 +48,7 @@ def get_document_xhtml_filename(document_collection_name, local_document_filenam
 
 def get_paragraph_metadata_filename(document_collection_name, local_document_filename):
     return f'{CORPUS_DIR}/{document_collection_name}/{CLEANTEXT_DIR}/{local_document_filename}{CLEANTEXT_EXTENSION}'
+
+
+def get_nlp_metadata_filename(document_collection_name, local_document_filename):
+    return f'{CORPUS_DIR}/{document_collection_name}/{NLP_DIR}/{local_document_filename}{NLP_EXTENSION}'
