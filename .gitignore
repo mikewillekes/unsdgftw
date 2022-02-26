@@ -12,6 +12,8 @@ corpus/IUCN/**
 corpus/MA/**
 !corpus/MA/metadata.jsonl
 
+corpus/research
+
 # Binary files
 bin/
 

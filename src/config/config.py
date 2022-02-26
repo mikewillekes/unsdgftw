@@ -9,6 +9,7 @@ NLP_DIR = '4-nlp'
 
 # =========================
 # Other Pathnames and Filenames
+CORPUS_METADATA_FILENAME = 'metadata.jsonl'
 DOCUMENT_METADATA_FILENAME = 'metadata.jsonl'
 SDGS_FILENAME = f'{CORPUS_DIR}/resources/Sustainable Development Goals Feb 2022.csv'
 MATCH_PHRASES_FILENAME = f'{CORPUS_DIR}/resources/MatchPhrases.txt'
