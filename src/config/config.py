@@ -6,6 +6,8 @@ RAW_DIR = '1-raw'
 TEXT_DIR = '2-text'
 CLEANTEXT_DIR = '3-cleantext'
 NLP_DIR = '4-nlp'
+GRAPH_DIR = '5-graph'
+
 
 # =========================
 # Other Pathnames and Filenames
