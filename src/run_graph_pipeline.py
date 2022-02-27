@@ -1,12 +1,12 @@
 # Local application imports
-from nlp.semantic_search import process_document_collection
+from graph.graph_builder import stage_graph_data
 
 
 def main():
-    process_document_collection('IPBES')
-    process_document_collection('IUCN')
-    process_document_collection('IPCC')
-    process_document_collection('MA')
+    stage_graph_data('IPBES')
+    stage_graph_data('IUCN')
+    stage_graph_data('IPCC')
+    stage_graph_data('MA')
 
 
 if __name__ == "__main__":
