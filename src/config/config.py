@@ -23,6 +23,7 @@ MATCH_PHRASES_FILENAME = f'{CORPUS_DIR}/resources/MatchPhrases.txt'
 TEXT_EXTENSION = '.xml'
 CLEANTEXT_EXTENSION = '.jsonl'
 NLP_EXTENSION = '.jsonl'
+GRAPH_EXTENSION = '.csv'
 
 # =========================
 # NLP Pipeline Vars
@@ -36,6 +37,10 @@ NLP_MIN_SENTENCE_LENGTH = 30
 # Max number of pages to process per document (helpful to speed things
 # up during developement). There are some 3000+ page docs in the corpus!
 MAX_PAGES_PER_DOCUMENT = 100
+
+
+def get_corpus_metadata_filename():
+    return f'{CORPUS_DIR}/{CORPUS_METADATA_FILENAME}'
 
 
 def get_document_metadata_filename(document_collection_name):
@@ -52,3 +57,7 @@ def get_paragraph_metadata_filename(document_collection_name, local_document_fil
 
 def get_nlp_metadata_filename(document_collection_name, local_document_filename):
     return f'{CORPUS_DIR}/{document_collection_name}/{NLP_DIR}/{local_document_filename}{NLP_EXTENSION}'
+
+
+def get_graph_staging_dir(document_collection_name):
+    return f'{CORPUS_DIR}/{document_collection_name}/{GRAPH_DIR}'

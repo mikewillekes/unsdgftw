@@ -9,8 +9,17 @@ from typing import List, Tuple
 @dataclass
 class Entity:
     id: str
+    mention_id: str
     text: str
     label: str
+
+
+@deserialize
+@serialize
+@dataclass
+class Sentence:
+    id: str
+    text: str
 
 
 @deserialize
@@ -24,7 +33,7 @@ class ParagraphMetadata:
     paragraph_len: int
     clean_text: str
     raw_text: str
-    sentences: List[str]
+    sentences: List[Sentence]
     entities: List[Entity]
 
 
@@ -32,7 +41,18 @@ def generate_paragraph_id(document_id, page_number, paragraph_number):
     """
         Generate a unique id for the paragraph.
     """
-    return f'{document_id}.{page_number}.{paragraph_number}'
+    return f'{document_id}.PG{page_number}.PA{paragraph_number}'
+
+
+def generate_mention_id(document_id, page_number, paragraph_number, entity_type, entity_number,):
+    return f'{generate_paragraph_id(document_id, page_number, paragraph_number)}.{entity_type}{entity_number}'
+
+
+def generate_sentence_id(document_id, page_number, paragraph_number, sentence_number):
+    """
+        Generate a unique id for the sentence.
+    """
+    return f'{generate_paragraph_id(document_id, page_number, paragraph_number)}.S{sentence_number}'
 
 
 def load_paragraph_metadata(filename):

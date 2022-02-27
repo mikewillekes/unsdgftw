@@ -40,7 +40,7 @@ def process_document(document_collection_name, document):
     
     # Sentence embeddings for each sentence
     sentence_embeddings = embedder.encode(
-        [s[2] for s in sentence_corpus],
+        [s[2].text for s in sentence_corpus],
         convert_to_tensor=True)
 
     top_k = min(500, len(sentence_corpus))
@@ -68,9 +68,8 @@ def process_document(document_collection_name, document):
                     query[0],
                     query[1],
                     score.item(), # Its a single-item tensor
-                    sentence,
-                    document.id,
-                    paragraph.id))
+                    sentence.text,
+                    sentence.id))
 
                 #print("(Score: {:.4f})".format(score), document.local_filename, paragraph.entities, sentence)
     

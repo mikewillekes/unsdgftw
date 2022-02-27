@@ -12,8 +12,7 @@ class NLPMetadata:
     sdg_query: str
     similarity: float
     sentence: str
-    document_id: str
-    paragraph_id: str
+    sentence_id: str
 
 
 def load_nlp_metadata(filename):

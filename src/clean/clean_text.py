@@ -272,13 +272,25 @@ def process_chunk(document, page_number, paragraph_number, paragraph_text):
     #
     # Process result of NLP pipeline
     # 
-    sentences = [sentence.text for sentence in nlp_doc.sents if len(sentence) > config.NLP_MIN_SENTENCE_LENGTH]
-    entities = [Entity(generate_entity_id(ent.text), ent.text, ent.label_) for ent in nlp_doc.ents if ent.label_ in ENTITY_TYPES]
+    sentences = [
+        Sentence(generate_sentence_id(document.id, page_number, paragraph_number, sentence_numeber), sentence.text) for sentence_numeber, sentence in enumerate(nlp_doc.sents) 
+        if len(sentence) > config.NLP_MIN_SENTENCE_LENGTH]
+
+    entities = [Entity(
+        generate_entity_id(ent.text),
+        generate_mention_id(document.id, page_number, paragraph_number, ent.label_, entity_number),
+        ent.text, 
+        ent.label_) for entity_number, ent in enumerate(nlp_doc.ents) if ent.label_ in ENTITY_TYPES]
     
     # Match specific keyword/phrases from <resources/MatchPhrases.txt>
     # A quick-and-dirty way to capture rules-based entities without complex ML training
     matches = matcher(nlp_doc)
-    entities.extend([Entity(generate_entity_id(nlp_doc[start:end].text), nlp_doc[start:end].text, 'PHRASE') for match_id, start, end in matches])
+    entities.extend([
+        Entity(
+            generate_entity_id(nlp_doc[match[1]:match[2]].text),
+            generate_mention_id(document.id, page_number, paragraph_number, 'PHRASE', entity_number),
+            nlp_doc[match[1]:match[2]].text,
+            'PHRASE') for entity_number, match in enumerate(matches)])
 
     # if nlp_doc.sents:
     #     for sent in nlp_doc.sents:

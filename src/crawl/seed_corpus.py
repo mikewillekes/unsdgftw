@@ -6,9 +6,7 @@ from config import config
 from metadata.corpus_metadata import CorpusMetadata
 
 
-filename = f'{config.CORPUS_DIR}/{config.CORPUS_METADATA_FILENAME}'
-
-save_corpus_metadata(filename, 
+save_corpus_metadata( 
     [
         CorpusMetadata(
             'IPBES',

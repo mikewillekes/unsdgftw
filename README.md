@@ -115,25 +115,3 @@ https://www.millenniumassessment.org/en/Index-2.html
 A collection of CSV files that define Nodes, Edges and Attributes for
 loading into Tigergraph
 
-### Nodes
-corpus_nodes.csv
-document_nodes.csv
-paragraph_nodes.csv
-mention_nodes.csv
-sentence_nodes.csv
-entity_nodes.csv
-entity_type_nodes.csv
-
-sdg_nodes.csv
-sdg_category_nodes.csv
-
-### Edges
-corpus_to_document_edges.csv
-document_to_paragraph_edges.csv
-paragraph_to_sentence_edges.csv
-sentence_to_sdg_edges.csv
-sdg_to_sdg_category_edges.csv
-
-paragraph_to_mention_edges.csv
-mention_to_entity_edges.csv
-entity_to_entity_type_edges.csv
