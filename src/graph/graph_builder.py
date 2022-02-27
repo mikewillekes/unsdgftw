@@ -17,12 +17,12 @@ SENTENCE_NODES = 'sentence_nodes' + config.GRAPH_EXTENSION
 ENTITY_NODES = 'entity_nodes' + config.GRAPH_EXTENSION
 SDG_NODES = 'sdg_nodes' + config.GRAPH_EXTENSION
 
-CORPUS_TO_DOCUMENT_EDGES = 'corpus_to_document_edges.csv' + config.GRAPH_EXTENSION
-DOCUMENT_TO_PARAGRAPH_EDGES = 'document_to_paragraph_edges.csv' + config.GRAPH_EXTENSION
-PARAGRAPH_TO_SENTENCE_EDGES = 'paragraph_to_sentence_edges.csv' + config.GRAPH_EXTENSION
-SENTENCE_TO_SDG_EDGES = 'sentence_to_sdg_edges.csv' + config.GRAPH_EXTENSION
-PARAGRAPH_TO_ENTITY_EDGES = 'paragraph_to_mention_edges.csv'  + config.GRAPH_EXTENSION
-MENTION_TO_ENTITY_EDGES = 'mention_to_entity_edges.csv' + config.GRAPH_EXTENSION
+CORPUS_TO_DOCUMENT_EDGES = 'corpus_to_document_edges' + config.GRAPH_EXTENSION
+DOCUMENT_TO_PARAGRAPH_EDGES = 'document_to_paragraph_edges' + config.GRAPH_EXTENSION
+PARAGRAPH_TO_SENTENCE_EDGES = 'paragraph_to_sentence_edges' + config.GRAPH_EXTENSION
+SENTENCE_TO_SDG_EDGES = 'sentence_to_sdg_edges' + config.GRAPH_EXTENSION
+PARAGRAPH_TO_MENTION_EDGES = 'paragraph_to_mention_edges'  + config.GRAPH_EXTENSION
+MENTION_TO_ENTITY_EDGES = 'mention_to_entity_edges' + config.GRAPH_EXTENSION
 
 def main():
     stage_graph_data('IUCN')
@@ -41,12 +41,7 @@ def build_writer(f, header_row):
 
 def stage_nodes(document_collection_name):
 
-    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{CORPUS_NODES}', mode='w') as f:
-        writer = build_writer(f, ['id', 'organization', 'source_url', 'summary'])
-        for corpus in load_corpus_metadata(config.get_corpus_metadata_filename()):
-            if corpus.id == document_collection_name:
-                writer.writerow([corpus.id, corpus.organization, corpus.source_url, corpus.summary])
-
+  
     with open(f'{config.get_graph_staging_dir(document_collection_name)}/{DOCUMENT_NODES}', mode='w') as f:
         writer = build_writer(f, ['id', 'organization', 'local_filename', 'about_url', 'download_url', 'title', 'summary', 'year'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
@@ -105,8 +100,58 @@ def stage_nodes(document_collection_name):
 
 
 def stage_edges(document_collection_name):
-    print('')
 
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{CORPUS_TO_DOCUMENT_EDGES}', mode='w') as f:
+        writer = build_writer(f, ['corpus_id', 'document_id'])
+        for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
+            writer.writerow([document.corpus_id, document.id])
+
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{DOCUMENT_TO_PARAGRAPH_EDGES}', mode='w') as f:
+        writer = build_writer(f, ['document_id', 'paragraph_id'])
+        for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
+            paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
+            for paragraph in load_paragraph_metadata(paragraph_metadata_filename):
+                for sentence in paragraph.sentences:
+                    writer.writerow([paragraph.document_id, paragraph.id])
+
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{DOCUMENT_TO_PARAGRAPH_EDGES}', mode='w') as f:
+        writer = build_writer(f, ['document_id', 'paragraph_id'])
+        for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
+            paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
+            for paragraph in load_paragraph_metadata(paragraph_metadata_filename):
+                for sentence in paragraph.sentences:
+                    writer.writerow([paragraph.document_id, paragraph.id])
+
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{PARAGRAPH_TO_SENTENCE_EDGES}', mode='w') as f:
+        writer = build_writer(f, ['paragraph_id', 'sentence_id'])
+        for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
+            paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
+            for paragraph in load_paragraph_metadata(paragraph_metadata_filename):
+                for sentence in paragraph.sentences:
+                    writer.writerow([paragraph.id, sentence.id])
+
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{SENTENCE_TO_SDG_EDGES}', mode='w') as f:
+        writer = build_writer(f, ['sentence_id', 'sdg_id', 'similarity'])
+        for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
+            nlp_metadata_filename = config.get_nlp_metadata_filename(document_collection_name, document.local_filename)
+            for record in load_nlp_metadata(nlp_metadata_filename):
+                writer.writerow([record.sentence_id, record.sdg_id, record.similarity])
+
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{PARAGRAPH_TO_MENTION_EDGES}', mode='w') as f:
+        writer = build_writer(f, ['paragraph_id', 'mention_id'])
+        for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
+            paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
+            for paragraph in load_paragraph_metadata(paragraph_metadata_filename):
+                for entity in paragraph.entities:
+                    writer.writerow([paragraph.id, entity.mention_id])
+
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{MENTION_TO_ENTITY_EDGES}', mode='w') as f:
+        writer = build_writer(f, ['mention_id', 'entity_id'])
+        for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
+            paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
+            for paragraph in load_paragraph_metadata(paragraph_metadata_filename):
+                for entity in paragraph.entities:
+                    writer.writerow([entity.mention_id, entity.id])
 
 if __name__ == "__main__":
     main()

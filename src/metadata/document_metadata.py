@@ -10,6 +10,7 @@ import hashlib
 @dataclass
 class DocumentMetadata:
     id: str
+    corpus_id: str
     organization: str
     local_filename: str
     about_url: str
