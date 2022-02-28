@@ -41,14 +41,19 @@ def build_writer(f, header_row):
 
 def stage_nodes(document_collection_name):
 
-  
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{CORPUS_NODES}', mode='w') as f:
+        writer = build_writer(f, ['id', 'organization', 'sourceURL', 'summary'])
+        for corpus in load_corpus_metadata(config.get_corpus_metadata_filename()):
+            if corpus.id == document_collection_name:
+                writer.writerow([corpus.id, corpus.organization, corpus.source_url, corpus.summary])
+
     with open(f'{config.get_graph_staging_dir(document_collection_name)}/{DOCUMENT_NODES}', mode='w') as f:
-        writer = build_writer(f, ['id', 'organization', 'local_filename', 'about_url', 'download_url', 'title', 'summary', 'year'])
+        writer = build_writer(f, ['id', 'organization', 'localFilename', 'aboutURL', 'downloadURL', 'title', 'summary', 'year'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             writer.writerow([document.id, document.organization, document.local_filename, document.about_url, document.download_url, document.title, document.summary, document.year.year])
 
     with open(f'{config.get_graph_staging_dir(document_collection_name)}/{PARAGRAPH_NODES}', mode='w') as f:
-        writer = build_writer(f, ['id', 'page_number', 'paragraph_number', 'paragraph_len', 'text'])
+        writer = build_writer(f, ['id', 'pageNumber', 'paragraphNumber', 'paragraphLength', 'text'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
             paragraphs = load_paragraph_metadata(paragraph_metadata_filename)
@@ -102,20 +107,12 @@ def stage_nodes(document_collection_name):
 def stage_edges(document_collection_name):
 
     with open(f'{config.get_graph_staging_dir(document_collection_name)}/{CORPUS_TO_DOCUMENT_EDGES}', mode='w') as f:
-        writer = build_writer(f, ['corpus_id', 'document_id'])
+        writer = build_writer(f, ['corpus', 'document'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             writer.writerow([document.corpus_id, document.id])
 
     with open(f'{config.get_graph_staging_dir(document_collection_name)}/{DOCUMENT_TO_PARAGRAPH_EDGES}', mode='w') as f:
-        writer = build_writer(f, ['document_id', 'paragraph_id'])
-        for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
-            paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
-            for paragraph in load_paragraph_metadata(paragraph_metadata_filename):
-                for sentence in paragraph.sentences:
-                    writer.writerow([paragraph.document_id, paragraph.id])
-
-    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{DOCUMENT_TO_PARAGRAPH_EDGES}', mode='w') as f:
-        writer = build_writer(f, ['document_id', 'paragraph_id'])
+        writer = build_writer(f, ['document', 'paragraph'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
             for paragraph in load_paragraph_metadata(paragraph_metadata_filename):
@@ -123,7 +120,7 @@ def stage_edges(document_collection_name):
                     writer.writerow([paragraph.document_id, paragraph.id])
 
     with open(f'{config.get_graph_staging_dir(document_collection_name)}/{PARAGRAPH_TO_SENTENCE_EDGES}', mode='w') as f:
-        writer = build_writer(f, ['paragraph_id', 'sentence_id'])
+        writer = build_writer(f, ['paragraph', 'sentence'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
             for paragraph in load_paragraph_metadata(paragraph_metadata_filename):
@@ -131,14 +128,14 @@ def stage_edges(document_collection_name):
                     writer.writerow([paragraph.id, sentence.id])
 
     with open(f'{config.get_graph_staging_dir(document_collection_name)}/{SENTENCE_TO_SDG_EDGES}', mode='w') as f:
-        writer = build_writer(f, ['sentence_id', 'sdg_id', 'similarity'])
+        writer = build_writer(f, ['sentence', 'sdg', 'similarity'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             nlp_metadata_filename = config.get_nlp_metadata_filename(document_collection_name, document.local_filename)
             for record in load_nlp_metadata(nlp_metadata_filename):
                 writer.writerow([record.sentence_id, record.sdg_id, record.similarity])
 
     with open(f'{config.get_graph_staging_dir(document_collection_name)}/{PARAGRAPH_TO_MENTION_EDGES}', mode='w') as f:
-        writer = build_writer(f, ['paragraph_id', 'mention_id'])
+        writer = build_writer(f, ['paragraph', 'mention'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
             for paragraph in load_paragraph_metadata(paragraph_metadata_filename):
@@ -146,7 +143,7 @@ def stage_edges(document_collection_name):
                     writer.writerow([paragraph.id, entity.mention_id])
 
     with open(f'{config.get_graph_staging_dir(document_collection_name)}/{MENTION_TO_ENTITY_EDGES}', mode='w') as f:
-        writer = build_writer(f, ['mention_id', 'entity_id'])
+        writer = build_writer(f, ['mention', 'entity'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
             for paragraph in load_paragraph_metadata(paragraph_metadata_filename):
