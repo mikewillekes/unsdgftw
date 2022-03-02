@@ -13,6 +13,8 @@ jupyter = "*"
 transformers = "*"
 tensorflow-gpu = "*"
 sentence-transformers = "*"
+pytigergraph = "*"
+python-dotenv = "*"
 
 [requires]
 python_version = "3.8"
