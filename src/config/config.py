@@ -39,6 +39,10 @@ NLP_MIN_SENTENCE_LENGTH = 30
 MAX_PAGES_PER_DOCUMENT = 100
 
 
+# =========================
+# TigerGraph Config
+GRAPH_NAME = 'UNSDGs'
+
 def get_corpus_metadata_filename():
     return f'{CORPUS_DIR}/{CORPUS_METADATA_FILENAME}'
 
