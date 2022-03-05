@@ -107,20 +107,6 @@ CREATE LOADING JOB load_job_paragraph_nodes_csv FOR GRAPH {config.GRAPH_NAME} {{
 
 print(conn.gsql(f'''
 USE GRAPH {config.GRAPH_NAME}
-CREATE LOADING JOB load_job_mention_nodes_csv FOR GRAPH {config.GRAPH_NAME} {{
-      DEFINE FILENAME MyDataSource;
-      LOAD MyDataSource TO VERTEX Mention VALUES($0) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
-}}'''))
-
-print(conn.gsql(f'''
-USE GRAPH {config.GRAPH_NAME}
-CREATE LOADING JOB load_job_entity_nodes_csv FOR GRAPH {config.GRAPH_NAME} {{
-      DEFINE FILENAME MyDataSource;
-      LOAD MyDataSource TO VERTEX Entity VALUES($0, $1, $2) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
-}}'''))
-
-print(conn.gsql(f'''
-USE GRAPH {config.GRAPH_NAME}
 CREATE LOADING JOB load_job_sentence_nodes_csv FOR GRAPH {config.GRAPH_NAME} {{
       DEFINE FILENAME MyDataSource;
       LOAD MyDataSource TO VERTEX Sentence VALUES($0, $1) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
@@ -131,6 +117,20 @@ USE GRAPH {config.GRAPH_NAME}
 CREATE LOADING JOB load_job_sdg_nodes_csv FOR GRAPH {config.GRAPH_NAME} {{
       DEFINE FILENAME MyDataSource;
       LOAD MyDataSource TO VERTEX SDG VALUES($0, $1) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
+}}'''))
+
+print(conn.gsql(f'''
+USE GRAPH {config.GRAPH_NAME}
+CREATE LOADING JOB load_job_mention_nodes_csv FOR GRAPH {config.GRAPH_NAME} {{
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO VERTEX Mention VALUES($0) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
+}}'''))
+
+print(conn.gsql(f'''
+USE GRAPH {config.GRAPH_NAME}
+CREATE LOADING JOB load_job_entity_nodes_csv FOR GRAPH {config.GRAPH_NAME} {{
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO VERTEX Entity VALUES($0, $1, $2) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
 }}'''))
 
 print(conn.gsql(f'''
@@ -149,6 +149,19 @@ CREATE LOADING JOB load_job_document_to_paragraph_edges_csv FOR GRAPH {config.GR
 
 print(conn.gsql(f'''
 USE GRAPH {config.GRAPH_NAME}
+CREATE LOADING JOB load_job_paragraph_to_sentence_edges_csv FOR GRAPH {config.GRAPH_NAME} {{
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO EDGE has_sentence VALUES($0, $1) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
+}}'''))
+
+print(conn.gsql(f'''
+CREATE LOADING JOB load_job_sentence_to_sdg_edges_csv FOR GRAPH {config.GRAPH_NAME} {{
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO EDGE is_similar VALUES($0, $1, $2) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
+}}'''))
+
+print(conn.gsql(f'''
+USE GRAPH {config.GRAPH_NAME}
 CREATE LOADING JOB load_job_paragraph_to_mention_edges_csv FOR GRAPH {config.GRAPH_NAME} {{
       DEFINE FILENAME MyDataSource;
       LOAD MyDataSource TO EDGE has_mention VALUES($0, $1) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
@@ -161,18 +174,6 @@ CREATE LOADING JOB load_job_mention_to_entity_edges_csv FOR GRAPH {config.GRAPH_
       LOAD MyDataSource TO EDGE has_entity VALUES($0, $1) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
 }}'''))
 
-print(conn.gsql(f'''
-USE GRAPH {config.GRAPH_NAME}
-CREATE LOADING JOB load_job_paragraph_to_sentence_edges_csv FOR GRAPH {config.GRAPH_NAME} {{
-      DEFINE FILENAME MyDataSource;
-      LOAD MyDataSource TO EDGE has_sentence VALUES($0, $1) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
-}}'''))
-
-print(conn.gsql(f'''
-CREATE LOADING JOB load_job_sentence_to_sdg_edges_csv FOR GRAPH {config.GRAPH_NAME} {{
-      DEFINE FILENAME MyDataSource;
-      LOAD MyDataSource TO EDGE is_similar VALUES($0, $1, $2) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
-}}'''))
 
 # All Done - Echo the token for Future Use
 print(f'token: {token}')

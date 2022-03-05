@@ -21,24 +21,29 @@ def stage_graph_data(document_collection_name):
 
 def build_writer(f, header_row):
     writer = csv.writer(f, delimiter=',', quotechar='"',  quoting=csv.QUOTE_MINIMAL)
-    writer.writerow(header_row)
+    # There's a bug where pyTigerGraph loading jobs are not skipping header rows
+    # even with  USING header="true" - so temporarily disable writing header rows.
+    #
+    # https://dev.tigergraph.com/forum/t/why-does-a-load-job-load-table-headers-as-nodes-into-the-database/1744/2
+    #
+    # writer.writerow(header_row)
     return writer
 
 
 def stage_nodes(document_collection_name):
 
-    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{CORPUS_NODES}', mode='w') as f:
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.CORPUS_NODES}', mode='w') as f:
         writer = build_writer(f, ['id', 'organization', 'sourceURL', 'summary'])
         for corpus in load_corpus_metadata(config.get_corpus_metadata_filename()):
             if corpus.id == document_collection_name:
                 writer.writerow([corpus.id, corpus.organization, corpus.source_url, corpus.summary])
 
-    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{DOCUMENT_NODES}', mode='w') as f:
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.DOCUMENT_NODES}', mode='w') as f:
         writer = build_writer(f, ['id', 'organization', 'localFilename', 'aboutURL', 'downloadURL', 'title', 'summary', 'year'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             writer.writerow([document.id, document.organization, document.local_filename, document.about_url, document.download_url, document.title, document.summary, document.year.year])
 
-    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{PARAGRAPH_NODES}', mode='w') as f:
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.PARAGRAPH_NODES}', mode='w') as f:
         writer = build_writer(f, ['id', 'pageNumber', 'paragraphNumber', 'paragraphLength', 'text'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
@@ -46,7 +51,7 @@ def stage_nodes(document_collection_name):
             for paragraph in paragraphs:
                 writer.writerow([paragraph.id, paragraph.page_number, paragraph.paragraph_number, paragraph.paragraph_len, paragraph.raw_text])
 
-    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{SENTENCE_NODES}', mode='w') as f:
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.SENTENCE_NODES}', mode='w') as f:
         writer = build_writer(f, ['id', 'text'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
@@ -60,7 +65,7 @@ def stage_nodes(document_collection_name):
     # times, and we want to record that data - however Tigergraph doesn't allow duplicate edges so every Paragraph-->Entity 
     # relationship has to 'flow through' a Mention node. 
     #
-    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{MENTION_NODES}', mode='w') as f:
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.MENTION_NODES}', mode='w') as f:
         writer = build_writer(f, ['id'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
@@ -69,7 +74,7 @@ def stage_nodes(document_collection_name):
                 for entity in paragraph.entities:
                     writer.writerow([entity.mention_id])
 
-    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{ENTITY_NODES}', mode='w') as f:
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.ENTITY_NODES}', mode='w') as f:
         writer = build_writer(f, ['id' ,'text', 'type'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
@@ -79,7 +84,7 @@ def stage_nodes(document_collection_name):
                     writer.writerow([entity.id, entity.text, entity.label])
 
 
-    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{SDG_NODES}', mode='w') as f:
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.SDG_NODES}', mode='w') as f:
         writer = build_writer(f, ['id' ,'text'])
         sdgs = {}
         for sdg in load_sdgs():
@@ -92,12 +97,12 @@ def stage_nodes(document_collection_name):
 
 def stage_edges(document_collection_name):
 
-    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{CORPUS_TO_DOCUMENT_EDGES}', mode='w') as f:
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.CORPUS_TO_DOCUMENT_EDGES}', mode='w') as f:
         writer = build_writer(f, ['corpus', 'document'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             writer.writerow([document.corpus_id, document.id])
 
-    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{DOCUMENT_TO_PARAGRAPH_EDGES}', mode='w') as f:
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.DOCUMENT_TO_PARAGRAPH_EDGES}', mode='w') as f:
         writer = build_writer(f, ['document', 'paragraph'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
@@ -105,7 +110,7 @@ def stage_edges(document_collection_name):
                 for sentence in paragraph.sentences:
                     writer.writerow([paragraph.document_id, paragraph.id])
 
-    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{PARAGRAPH_TO_SENTENCE_EDGES}', mode='w') as f:
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.PARAGRAPH_TO_SENTENCE_EDGES}', mode='w') as f:
         writer = build_writer(f, ['paragraph', 'sentence'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
@@ -113,14 +118,14 @@ def stage_edges(document_collection_name):
                 for sentence in paragraph.sentences:
                     writer.writerow([paragraph.id, sentence.id])
 
-    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{SENTENCE_TO_SDG_EDGES}', mode='w') as f:
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.SENTENCE_TO_SDG_EDGES}', mode='w') as f:
         writer = build_writer(f, ['sentence', 'sdg', 'similarity'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             nlp_metadata_filename = config.get_nlp_metadata_filename(document_collection_name, document.local_filename)
             for record in load_nlp_metadata(nlp_metadata_filename):
                 writer.writerow([record.sentence_id, record.sdg_id, record.similarity])
 
-    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{PARAGRAPH_TO_MENTION_EDGES}', mode='w') as f:
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.PARAGRAPH_TO_MENTION_EDGES}', mode='w') as f:
         writer = build_writer(f, ['paragraph', 'mention'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
@@ -128,7 +133,7 @@ def stage_edges(document_collection_name):
                 for entity in paragraph.entities:
                     writer.writerow([paragraph.id, entity.mention_id])
 
-    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{MENTION_TO_ENTITY_EDGES}', mode='w') as f:
+    with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.MENTION_TO_ENTITY_EDGES}', mode='w') as f:
         writer = build_writer(f, ['mention', 'entity'])
         for document in load_document_metadata(config.get_document_metadata_filename(document_collection_name)):
             paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
