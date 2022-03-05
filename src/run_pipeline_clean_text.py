@@ -7,7 +7,8 @@ def main():
     clean_document_collection('IUCN')
     clean_document_collection('IPCC')
     clean_document_collection('MA')
-
+    clean_document_collection('OKR')
+    clean_document_collection('UNICEF')
 
 if __name__ == "__main__":
     main()
