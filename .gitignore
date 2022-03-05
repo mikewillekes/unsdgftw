@@ -12,6 +12,12 @@ corpus/IUCN/**
 corpus/MA/**
 !corpus/MA/metadata.jsonl
 
+corpus/OKR/**
+!corpus/OKR/metadata.jsonl
+
+corpus/UNICEF/**
+!corpus/UNICEF/metadata.jsonl
+
 corpus/research
 
 # Binary files

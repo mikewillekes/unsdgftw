@@ -53,7 +53,7 @@ save_document_metadata(filename,
             'Global Assessment Reports: Volume 1: Current State & Trends; Chapter 13. Air Quality and Climate',
             'The MA synthesized information from the scientific literature and relevant peer-reviewed datasets and models. It incorporated knowledge held by the private sector, practitioners, local communities, and indigenous peoples. The MA did not aim to generate new primary knowledge, but instead sought to add value to existing information by collating, evaluating, summarizing, interpreting, and communicating it in a useful form.',
             date(2005, 1, 1)
-        ),
+        )
     ]
 )
 
