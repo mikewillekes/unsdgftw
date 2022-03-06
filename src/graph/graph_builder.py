@@ -11,7 +11,7 @@ from sdgs.sustainable_development_goals import *
 
 
 def main():
-    stage_graph_data('IUCN')
+    stage_graph_data('UNICEF')
 
 
 def stage_graph_data(document_collection_name):

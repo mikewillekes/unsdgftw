@@ -79,7 +79,7 @@ def clean_xhtml_document(document_collection_name, document):
             for paragraph_number, paragraph in enumerate(page.find_all('p')):
 
                 if paragraph.text:
-                    raw_text = normalize_unicode(normalize_whitespace(paragraph.text))
+                    raw_text = remove_midword_hyphens(normalize_unicode(normalize_whitespace(paragraph.text)))
                     
                     if not raw_text:
                         continue
@@ -124,6 +124,10 @@ def normalize_unicode(s):
 
 def remove_punctuation(s):
     return re.sub(r'[^\w\s]', '', s)
+
+
+def remove_midword_hyphens(s):
+    return re.sub(r'-\s', '', s)
 
 
 def clean_parentheses(s):
