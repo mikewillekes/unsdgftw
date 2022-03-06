@@ -15,6 +15,7 @@ tensorflow-gpu = "*"
 sentence-transformers = "*"
 pytigergraph = "*"
 python-dotenv = "*"
+bertopic = "*"
 
 [requires]
 python_version = "3.8"
