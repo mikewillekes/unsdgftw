@@ -274,7 +274,7 @@ def process_chunk(document, page_number, paragraph_number, paragraph_text):
     # 
     sentences = [
         Sentence(generate_sentence_id(document.id, page_number, paragraph_number, sentence_numeber), sentence.text) for sentence_numeber, sentence in enumerate(nlp_doc.sents) 
-        if len(sentence) > config.NLP_MIN_SENTENCE_LENGTH]
+        if len(sentence.text) > config.NLP_MIN_SENTENCE_LENGTH]
 
     entities = [Entity(
         generate_entity_id(ent.text),
@@ -294,7 +294,7 @@ def process_chunk(document, page_number, paragraph_number, paragraph_text):
 
     # if nlp_doc.sents:
     #     for sent in nlp_doc.sents:
-    #         print(f'{sent.text}')
+    #         print(f'{sent.text} : {len(sent.text)}')
 
 
     # if nlp_doc.ents:
