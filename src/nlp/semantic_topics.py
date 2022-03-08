@@ -2,26 +2,21 @@ import re
 import time
 
 from bertopic import BERTopic
-from sentence_transformers import SentenceTransformer,util
-import torch
 
 # Local application imports
 from metadata.document_metadata import *
 from metadata.paragraph_metadata import *
-from metadata.nlp_metadata import *
+from metadata.topic_metadata import *
 from config import config
-from sdgs.sustainable_development_goals import *
-from clean.clean_text import normalize_unicode
 
-#embedder = SentenceTransformer('all-MiniLM-L6-v2')
 
 model = BERTopic(embedding_model='all-MiniLM-L6-v2')
 
 paragraph_corpus = []
 
 def main():
-    #process_document_collections(['IPBES', 'IPCC', 'IUCN', 'MA', 'OKR', 'UNICEF'])
-    process_document_collections(['OKR', 'UNICEF'])
+    process_document_collections(['IPBES', 'IPCC', 'IUCN', 'MA', 'OKR', 'UNICEF'])
+    #process_document_collections(['OKR', 'UNICEF'])
 
 
 def process_document_collections(document_collections):
@@ -43,16 +38,28 @@ def process_document_collections(document_collections):
             paragraph_corpus.extend(process_document(document_collection_name, document))
             print(f'{len(paragraph_corpus)} total paragraphs')
     
-    # Build embeddings
+    # Build topic model and fit to current corpus
     print(f'Topic Modelling {len(paragraph_corpus)} paragraphs; Please wait...')
+    topic_numbers, probabilities = model.fit_transform([p[1].clean_text for p in paragraph_corpus])
 
-    topics, probabilities = model.fit_transform([p[1].clean_text for p in paragraph_corpus])
-    
-    for t in model.get_topics():
-        print(t[0], t[1])
-    
-        
+    paragraph_topics = []
 
+    for (topic_number, topic_probability, paragraph_id, paragraph_clean_text) in zip(
+        topic_numbers,
+        probabilities,
+        [p[1].id for p in paragraph_corpus],
+        [p[1].clean_text for p in paragraph_corpus]):
+
+            if (topic_number > 0):
+                paragraph_topics.append(TopicMetadata(
+                    model.get_topic_info(topic_number)['Name'].item(),  # It's a Pandas Series, use .item() to fetch the string value
+                    topic_number,
+                    topic_probability,
+                    [t[0] for t in model.get_topic(topic_number)],
+                    paragraph_id,
+                    paragraph_clean_text))
+
+    save_topic_metadata(config.get_topic_metadata_filename(), paragraph_topics)
 
 
 def process_document(document_collection_name, document):

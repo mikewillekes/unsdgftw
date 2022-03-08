@@ -19,6 +19,7 @@ corpus/UNICEF/**
 !corpus/UNICEF/metadata.jsonl
 
 corpus/research
+corpus/topics.jsonl
 
 # Binary files
 bin/

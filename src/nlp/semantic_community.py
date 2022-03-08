@@ -65,7 +65,7 @@ def process_document_collections(document_collections):
     # Print for all clusters the top 3 and bottom 3 elements
     for i, cluster in enumerate(clusters):
         print(f'Cluster {i+1} : {len(cluster)}')
-        for index in cluster[0:3]:
+        for index in cluster[0:5]:
             document = sentence_corpus[index][0]
             paragraph = sentence_corpus[index][1]
             sentence = sentence_corpus[index][2] 

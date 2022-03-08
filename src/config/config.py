@@ -13,6 +13,7 @@ GRAPH_DIR = '5-graph'
 # Other Pathnames and Filenames
 CORPUS_METADATA_FILENAME = 'metadata.jsonl'
 DOCUMENT_METADATA_FILENAME = 'metadata.jsonl'
+TOPIC_METADATA_FILENAME = 'topics.jsonl'
 SDGS_FILENAME = f'{CORPUS_DIR}/resources/Sustainable Development Goals Feb 2022.csv'
 MATCH_PHRASES_FILENAME = f'{CORPUS_DIR}/resources/MatchPhrases.txt'
 
@@ -61,6 +62,9 @@ def get_paragraph_metadata_filename(document_collection_name, local_document_fil
 
 def get_nlp_metadata_filename(document_collection_name, local_document_filename):
     return f'{CORPUS_DIR}/{document_collection_name}/{NLP_DIR}/{local_document_filename}{NLP_EXTENSION}'
+
+def get_topic_metadata_filename():
+    return f'{CORPUS_DIR}/{TOPIC_METADATA_FILENAME}'
 
 
 def get_graph_staging_dir(document_collection_name):
