@@ -15,12 +15,14 @@ model = BERTopic(embedding_model='all-MiniLM-L6-v2')
 paragraph_corpus = []
 
 def main():
-    process_document_collections(['IPBES', 'IPCC', 'IUCN', 'MA', 'OKR', 'UNICEF'])
-    #process_document_collections(['OKR', 'UNICEF'])
+    #process_document_collections(['IPBES', 'IPCC', 'IUCN', 'MA', 'OKR', 'UNICEF'])
+    process_document_collections(['OKR', 'UNICEF'])
 
 
 def process_document_collections(document_collections):
     
+    paragraph_topics = {}
+
     #
     # Unlike the SDG --> Sentence semantic similarity, in this case
     # we need to process all the docs at once
@@ -30,6 +32,7 @@ def process_document_collections(document_collections):
         print(f'{document_collection_name}')
         document_metadata_filename = config.get_document_metadata_filename(document_collection_name)
         documents = load_document_metadata(document_metadata_filename)
+        paragraph_topics[document_collection_name] = []
         
         for document in documents:
             print(f'{document.local_filename}')
@@ -42,16 +45,15 @@ def process_document_collections(document_collections):
     print(f'Topic Modelling {len(paragraph_corpus)} paragraphs; Please wait...')
     topic_numbers, probabilities = model.fit_transform([p[1].clean_text for p in paragraph_corpus])
 
-    paragraph_topics = []
-
-    for (topic_number, topic_probability, paragraph_id, paragraph_clean_text) in zip(
+    for (topic_number, topic_probability, document_collection_name, paragraph_id, paragraph_clean_text) in zip(
         topic_numbers,
         probabilities,
+        [p[0].corpus_id for p in paragraph_corpus],
         [p[1].id for p in paragraph_corpus],
         [p[1].clean_text for p in paragraph_corpus]):
 
             if (topic_number > 0):
-                paragraph_topics.append(TopicMetadata(
+                paragraph_topics[document_collection_name].append(TopicMetadata(
                     model.get_topic_info(topic_number)['Name'].item(),  # It's a Pandas Series, use .item() to fetch the string value
                     topic_number,
                     topic_probability,
@@ -59,7 +61,8 @@ def process_document_collections(document_collections):
                     paragraph_id,
                     paragraph_clean_text))
 
-    save_topic_metadata(config.get_topic_metadata_filename(), paragraph_topics)
+    for document_collection_name in document_collections:
+        save_topic_metadata(config.get_topic_metadata_filename(document_collection_name), paragraph_topics[document_collection_name])
 
 
 def process_document(document_collection_name, document):

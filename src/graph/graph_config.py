@@ -7,6 +7,7 @@ MENTION_NODES = 'mention_nodes' + config.GRAPH_EXTENSION
 SENTENCE_NODES = 'sentence_nodes' + config.GRAPH_EXTENSION
 ENTITY_NODES = 'entity_nodes' + config.GRAPH_EXTENSION
 SDG_NODES = 'sdg_nodes' + config.GRAPH_EXTENSION
+TOPIC_NODES = 'topic_nodes' + config.GRAPH_EXTENSION
 
 CORPUS_TO_DOCUMENT_EDGES = 'corpus_to_document_edges' + config.GRAPH_EXTENSION
 DOCUMENT_TO_PARAGRAPH_EDGES = 'document_to_paragraph_edges' + config.GRAPH_EXTENSION

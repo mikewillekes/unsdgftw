@@ -18,7 +18,7 @@ conn = tg.TigerGraphConnection(
 print(conn.echo())
 
 def main():
-    load_graph_data('IUCN')
+    load_graph_data('UNICEF')
 
 
 def load_graph_data(document_collection_name):
@@ -37,6 +37,10 @@ def load_graph_data(document_collection_name):
     load_file(document_collection_name, graph_config.SENTENCE_TO_SDG_EDGES, 'load_job_sentence_to_sdg_edges_csv')
     load_file(document_collection_name, graph_config.PARAGRAPH_TO_MENTION_EDGES, 'load_job_paragraph_to_mention_edges_csv')
     load_file(document_collection_name, graph_config.MENTION_TO_ENTITY_EDGES, 'load_job_mention_to_entity_edges_csv')
+
+    # Note: Topic nodes and Edges are in the same CSV file
+    load_file(document_collection_name, graph_config.TOPIC_NODES, 'load_job_topic_nodes_csv')
+    load_file(document_collection_name, graph_config.TOPIC_NODES, 'load_job_paragraph_to_topic_edges_csv')
 
 
 def load_file(document_collection_name, filename, tg_job_name):

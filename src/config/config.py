@@ -63,8 +63,8 @@ def get_paragraph_metadata_filename(document_collection_name, local_document_fil
 def get_nlp_metadata_filename(document_collection_name, local_document_filename):
     return f'{CORPUS_DIR}/{document_collection_name}/{NLP_DIR}/{local_document_filename}{NLP_EXTENSION}'
 
-def get_topic_metadata_filename():
-    return f'{CORPUS_DIR}/{TOPIC_METADATA_FILENAME}'
+def get_topic_metadata_filename(document_collection_name):
+    return f'{CORPUS_DIR}/{document_collection_name}/{NLP_DIR}/{TOPIC_METADATA_FILENAME}'
 
 
 def get_graph_staging_dir(document_collection_name):

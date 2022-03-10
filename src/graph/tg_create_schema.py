@@ -33,8 +33,9 @@ CREATE VERTEX Corpus(PRIMARY_ID id STRING, organization STRING, sourceURL STRING
 CREATE VERTEX Document(PRIMARY_ID id STRING, organization STRING, localFilename STRING, aboutURL STRING, downloadURL STRING, title STRING, summary STRING, year INT) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
 CREATE VERTEX Paragraph(PRIMARY_ID id STRING, pageNumber INT, paragraphNumber INT, paragraphLen INT, text STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
 CREATE VERTEX Sentence(PRIMARY_ID id STRING, text STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
-CREATE VERTEX Entity(PRIMARY_ID id STRING, text STRING, entity_type STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Entity(PRIMARY_ID id STRING, text STRING, entityType STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
 CREATE VERTEX SDG(PRIMARY_ID id STRING, text STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Topic(PRIMARY_ID id STRING, topic INT, terms SET<STRING>) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
 
 CREATE UNDIRECTED EDGE has_entity(FROM Mention, TO Entity)
 CREATE UNDIRECTED EDGE has_mention(FROM Paragraph, TO Mention)
@@ -42,6 +43,7 @@ CREATE UNDIRECTED EDGE has_sentence(FROM Paragraph, TO Sentence)
 CREATE UNDIRECTED EDGE has_paragraph(FROM Document, TO Paragraph)
 CREATE UNDIRECTED EDGE has_document(FROM Corpus, TO Document)
 CREATE UNDIRECTED EDGE is_similar(FROM Sentence, TO SDG, similarity FLOAT DEFAULT "0.0")
+CREATE UNDIRECTED EDGE has_topic(FROM Paragraph, TO Topic, probability FLOAT DEFAULT "0.0")
 '''))
 
 #
@@ -50,7 +52,7 @@ CREATE UNDIRECTED EDGE is_similar(FROM Sentence, TO SDG, similarity FLOAT DEFAUL
 print(conn.gsql(f'''
 CREATE GLOBAL SCHEMA_CHANGE JOB schema_change_job_AddAttributeIndex {{
   ALTER VERTEX Document ADD INDEX document_year_idx ON (year);
-  ALTER VERTEX Entity ADD INDEX entity_type_idx ON (entity_type);
+  ALTER VERTEX Entity ADD INDEX entity_type_idx ON (entityType);
 }}'''))
 print(conn.gsql('RUN GLOBAL SCHEMA_CHANGE JOB schema_change_job_AddAttributeIndex'))
 print(conn.gsql('DROP JOB schema_change_job_AddAttributeIndex'))
@@ -61,8 +63,8 @@ print(conn.gsql('DROP JOB schema_change_job_AddAttributeIndex'))
 #
 print(conn.gsql(f'''
 CREATE GRAPH {config.GRAPH_NAME}(
-  Mention, Corpus, Document, Paragraph, Sentence, Entity, SDG,
-  has_entity, has_mention, has_sentence, has_paragraph, has_document, is_similar
+  Mention, Corpus, Document, Paragraph, Sentence, Entity, SDG, Topic,
+  has_entity, has_mention, has_sentence, has_paragraph, has_document, is_similar, has_topic
 )'''))
 
 
@@ -135,6 +137,13 @@ CREATE LOADING JOB load_job_entity_nodes_csv FOR GRAPH {config.GRAPH_NAME} {{
 
 print(conn.gsql(f'''
 USE GRAPH {config.GRAPH_NAME}
+CREATE LOADING JOB load_job_topic_nodes_csv FOR GRAPH {config.GRAPH_NAME} {{
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO VERTEX Topic VALUES($1, $3, SET($4, $5, $6, $7, $8, $9, $10, $11, $12, $13)) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
+}}'''))
+
+print(conn.gsql(f'''
+USE GRAPH {config.GRAPH_NAME}
 CREATE LOADING JOB load_job_corpus_to_document_edges_csv FOR GRAPH {config.GRAPH_NAME} {{
       DEFINE FILENAME MyDataSource;
       LOAD MyDataSource TO EDGE has_document VALUES($0, $1) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
@@ -174,6 +183,12 @@ CREATE LOADING JOB load_job_mention_to_entity_edges_csv FOR GRAPH {config.GRAPH_
       LOAD MyDataSource TO EDGE has_entity VALUES($0, $1) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
 }}'''))
 
+print(conn.gsql(f'''
+USE GRAPH {config.GRAPH_NAME}
+CREATE LOADING JOB load_job_paragraph_to_topic_edges_csv FOR GRAPH {config.GRAPH_NAME} {{
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO EDGE has_topic VALUES($0, $1, $2) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
+}}'''))
 
 # All Done - Echo the token for Future Use
 print(f'token: {token}')
