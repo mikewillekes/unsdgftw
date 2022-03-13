@@ -21,7 +21,7 @@ conn = tg.TigerGraphConnection(
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # NOTE: ONLY UNCOMMENT FOR EMERGENCIES!! IT WILL DELETE EVERYTHING FROM YOUR GRAPH!
-print(conn.gsql('''DROP ALL'''))
+#print(conn.gsql('''DROP ALL'''))
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #
@@ -192,10 +192,3 @@ CREATE LOADING JOB load_job_paragraph_to_topic_edges_csv FOR GRAPH {config.GRAPH
 
 # All Done - Echo the token for Future Use
 print(f'token: {token}')
-#
-# In Future connections you can securely connect with REST++ auth like this:
-#
-# conn = tg.TigerGraphConnection(
-#     host=f'{os.environ.get("tg_host")}', 
-#     graphname=f'{config.GRAPH_NAME}', 
-#     apiToken=f'{os.environ.get("tg_token")}')

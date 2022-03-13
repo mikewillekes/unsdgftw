@@ -15,14 +15,22 @@ load_dotenv()
 #auth_token = conn.getToken('GET_IT_FROM_1PASSWORD')
 #print(auth_token)
 
+# Connect and built schema
 conn = tg.TigerGraphConnection(
-    host=f'{os.environ.get("tg_address")}', 
+    host=f'{os.environ.get("tg_host")}',
+    username=f'{os.environ.get("tg_username")}',
+    password=f'{os.environ.get("tg_password")}',
     graphname=f'{config.GRAPH_NAME}', 
     apiToken=f'{os.environ.get("tg_token")}')
+
+print(conn.echo())
 
 #
 # Note: on TG Free Tier - the running solution is automatically stopped after ~1hr of idle.
 #       Make sure it's actually running before freaking out about connections errors
 #
-results = conn.getEndpoints()
+results = conn.getInstalledQueries()
+
+results = conn.runInstalledQuery('Document_Expansion', {'doc': '3649ae7f73d8cabf69d27e91ae7b28d6d6def898b0d8ffb21c38f4d6f8387308', 'max_results' : 5})
+
 print(results)
