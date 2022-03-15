@@ -29,6 +29,8 @@ st.write(conn.echo())
 results = conn.getInstalledQueries()
 
 #results = conn.runInstalledQuery('Document_Expansion', {'doc': '3649ae7f73d8cabf69d27e91ae7b28d6d6def898b0d8ffb21c38f4d6f8387308', 'max_results' : 5})
-results = conn.runInstalledQuery('SDG_Expansion', {'sdg': '3.3', 'max_results' : 10})
+results = conn.runInstalledQuery('SDG_Expansion', {'sdg': '3.2', 'max_results' : 10})
 
-st.write(results)
+st.write(st.experimental_get_query_params())
+
+st.write("check out this [link](http://localhost:8501?sdg=1.2)")
