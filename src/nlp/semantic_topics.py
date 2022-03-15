@@ -15,8 +15,8 @@ model = BERTopic(embedding_model='all-MiniLM-L6-v2')
 paragraph_corpus = []
 
 def main():
-    #process_document_collections(['IPBES', 'IPCC', 'IUCN', 'MA', 'OKR', 'UNICEF'])
-    process_document_collections(['OKR', 'UNICEF'])
+    process_document_collections(['IPBES', 'IPCC', 'IUCN', 'MA', 'OKR', 'UNICEF'])
+    #process_document_collections(['OKR', 'UNICEF'])
 
 
 def process_document_collections(document_collections):
