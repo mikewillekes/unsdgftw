@@ -16,6 +16,7 @@ sentence-transformers = "*"
 pytigergraph = "*"
 python-dotenv = "*"
 bertopic = "*"
+streamlit = "*"
 
 [requires]
 python_version = "3.8"
