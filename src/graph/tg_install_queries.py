@@ -168,7 +168,6 @@ CREATE QUERY Sentence_Expansion(SET<VERTEX<Sentence>> sentences, INT max_results
                   s.@visitCount += 1
                 ORDER BY s.@visitCount DESC
                 LIMIT max_results;
-      
  
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Documents linked to Paragraphs
