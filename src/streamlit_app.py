@@ -26,8 +26,8 @@ conn = tg.TigerGraphConnection(
     graphname=f'{config.GRAPH_NAME}', 
     apiToken=f'{os.environ.get("tg_token")}')
 
-st.sidebar.write(conn.echo())
-st.sidebar.markdown("check out this [link](http://localhost:8501?sdg=1.2)")
+#st.sidebar.write(conn.echo())
+#st.sidebar.markdown("check out this [link](./?sdg=1.2)")
 
 def show_default_view():
     st.title('Default')
