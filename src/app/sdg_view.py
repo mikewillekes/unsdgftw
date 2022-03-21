@@ -1,3 +1,4 @@
+from posixpath import split
 import streamlit as st
 import pyTigerGraph as tg
 
@@ -11,31 +12,23 @@ def show_sdg_view(conn, sdg_id, max_results):
 
     # Get primary results from TigerGraph
     results = conn.runInstalledQuery('SDG_Expansion', {'sdg': sdg_id, 'max_results' : max_results})
-    current_sdg = get_current_sdg(sdgs, results)
+    page_sdg = get_current_sdg(sdgs, results)
 
     #
     # Write title/info
     #
-    write_titles(current_sdg)
+    write_titles(page_sdg)
 
     #
     # Write Topics
     st.header('Related Topics')
-    st.caption(f'These topics are groups of words and concepts that frequently occur alongside SDG {current_sdg.goal_num}')
+    st.markdown(f'These topics are groups of words and concepts that frequently occur alongside SDG {page_sdg.goal_num}')
     topics = []
     for topic in results[4]['Topics']:
         topics.append('- ' + ', '.join(topic['attributes']['terms']))
     st.markdown('\n'.join(topics))
 
-    #
-    # Write SDGs
-    st.header('Related SDGs')
-    related_sdgs = []
-    for s in results[2]['SDGs']:
-        if s['v_id'] in sdgs:
-            goal_num = sdgs[s["v_id"]].goal_num
-            related_sdgs.append(f'- [{goal_num}](./?sdg={goal_num}) {sdgs[s["v_id"]].goal}')         
-    st.markdown('\n'.join(related_sdgs))
+    write_sdgs(page_sdg, sdgs, results)
 
     #
     # Write Documents
@@ -68,8 +61,8 @@ def write_titles(sdg):
     # Write summary results into Sidebar
     st.sidebar.title(sdg.goal_num)
     st.sidebar.header(sdg.goal_category_short)
-    st.sidebar.caption(sdg.goal_category_long)
-    st.sidebar.subheader(f'{sdg.goal_num} - {sdg.goal}')
+    st.sidebar.markdown(sdg.goal_category_long)
+    st.sidebar.markdown(sdg.goal)
 
     st.sidebar.markdown('''
         - [Related Topics](#related-topics)
@@ -78,12 +71,37 @@ def write_titles(sdg):
     ''')
 
 
-def write_documents(sdgs, results):
+def write_sdgs(page_sdg, all_sdgs, results):
+    #
+    # Write Related SDGs
+    #
+    st.header('Related SDGs')
 
-    # Write summary results into Sidebar
-    sdg = sdgs[results[0]['Start'][0]['v_id']]
-    st.sidebar.title(sdg.goal_category_short)
-    st.sidebar.caption(sdg.goal_category_long)
+    documents = dict([
+        (d['attributes']['id'], d['attributes']) for d in results[1]['Documents']
+    ])
 
-    # Write Page title
-    st.write(f'{sdg.goal}')
+    for result in results[2]['SDGs']:
+        if result['v_id'] in all_sdgs and result['v_id'] != page_sdg.goal_num:
+            
+            s = all_sdgs[result["v_id"]]
+            paragraphs = sorted(result['attributes']['@relatedParagraphs'], key = lambda x: x['similarity'], reverse = True)
+            st.markdown(f'###### {s.goal_num} - {s.goal} _({len(paragraphs)} paragraphs)_')    
+
+            with st.expander('Explore from here...'):
+                st.markdown(f'Explore **SDG [{s.goal_num}](./?sdg={s.goal_num}) - {s.goal}**')
+                for paragraph in paragraphs[:5]:
+
+                    ids = paragraph['paragraph_id'].split('.')
+                    document_id = ids[0]
+                    page_number = ids[1][2:]
+                    if document_id in documents:
+                        st.markdown(f'''
+                            {paragraph["text"]}
+                            [{documents[document_id]["organization"]}, {documents[document_id]["title"]}, Page {page_number}](./?doc={document_id})''')
+                    else:
+                        st.markdown(f'''
+                            {paragraph["text"]}
+                            [Document {document_id}, Page {page_number}](./?doc={document_id})''')
+
+                 
