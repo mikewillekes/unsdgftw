@@ -91,7 +91,6 @@ def build_query_corpus():
     sdgs = load_sdgs()
 
     for sdg in sdgs:
-        query_corpus[sdg.goal_category_num] = clean_query_text(f'{sdg.goal_category_short}, {sdg.goal_category_long}')
         query_corpus[sdg.goal_num] = clean_query_text(f'{sdg.goal}')
 
     return list(query_corpus.items())
