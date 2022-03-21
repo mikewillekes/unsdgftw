@@ -89,35 +89,32 @@ INSTALL QUERY Document_Expansion
 print(conn.gsql(f'''
 USE GRAPH {config.GRAPH_NAME}
 CREATE QUERY SDG_Expansion(VERTEX<SDG> sdg, INT max_results) FOR GRAPH UNSDGs {{ 
-    
+  
+  TYPEDEF TUPLE <STRING paragraph_id, STRING text, FLOAT similarity> PARAGRAPH_SDG_RECORD;
+  
   Start = {{sdg}};
   
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Sentences linked to SDG
+  # Other highly-similar SDGs 
   AvgAccum @avgSimilarity;
-  Sentences = SELECT st 
-                FROM Start:s -(is_similar:sim)- Sentence:st
-                WHERE sim.similarity > 0.6
-                ACCUM
-                  st.@avgSimilarity += sim.similarity;
-       
-  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Other highly-similar SDGs linked to those Sentences
   SumAccum<INT> @visitCount;
-  SDGs = SELECT s 
-                FROM Sentences:st -(is_similar:sim)- SDG:s
-                WHERE sim.similarity > 0.6
+  ListAccum<PARAGRAPH_SDG_RECORD> @relatedParagraphs;
+  SDGs = SELECT s2
+                FROM Start:s1 -(is_similar:sim1)- Sentence:st -()- Paragraph:p -()- Sentence:st -(is_similar:sim2)- SDG:s2
+                WHERE sim1.similarity > 0.6 AND sim2.similarity > 0.6
                 ACCUM
-                  s.@avgSimilarity += sim.similarity,
-                  s.@visitCount += 1
-                ORDER BY s.@visitCount DESC
-                LIMIT max_results;   
- 
+                  s2.@avgSimilarity += (sim1.similarity + sim2.similarity) / 2,
+                  s2.@visitCount += 1,
+                  s2.@relatedParagraphs += PARAGRAPH_SDG_RECORD(p.id, p.text,  (sim1.similarity + sim2.similarity) / 2)
+                ORDER BY s2.@visitCount DESC
+                LIMIT max_results;
+  
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Documents linked to Paragraphs
   Documents = SELECT d
-                FROM Sentences:st -()- Paragraph:p -()- Document:d
+                FROM Start:s1 -(is_similar:sim1)- Sentence:st -()- Paragraph:p -()- Document:d
                 ACCUM
+                  d.@avgSimilarity += sim1.similarity,
                   d.@visitCount += 1
                 ORDER BY d.@visitCount DESC
                 LIMIT max_results;
@@ -125,8 +122,9 @@ CREATE QUERY SDG_Expansion(VERTEX<SDG> sdg, INT max_results) FOR GRAPH UNSDGs {{
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Entities linked by mention in Paragraph
   Entities = SELECT e
-              FROM Sentences:st -()- Paragraph:p -()- Mention:m -()- Entity:e
+              FROM Start:s1 -(is_similar:sim1)- Sentence:st -()- Paragraph:p -()- Mention:m -()- Entity:e
               ACCUM
+                e.@avgSimilarity += sim1.similarity,
                 e.@visitCount += 1
               ORDER BY e.@visitCount DESC
               LIMIT max_results;
@@ -134,9 +132,11 @@ CREATE QUERY SDG_Expansion(VERTEX<SDG> sdg, INT max_results) FOR GRAPH UNSDGs {{
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Topics linked by Paragraph
   Topics = SELECT t
-              FROM Sentences:st -()- Paragraph:p -()- Topic:t
+              FROM Start:s1 -(is_similar:sim1)- Sentence:st -()- Paragraph:p -()- Topic:t
               ACCUM
-                t.@visitCount += 1
+                t.@avgSimilarity += sim1.similarity,
+                t.@visitCount += 1,
+                t.@relatedParagraphs += PARAGRAPH_SDG_RECORD(p.id, p.text, sim1.similarity)
               ORDER BY t.@visitCount DESC
               LIMIT max_results;
   
