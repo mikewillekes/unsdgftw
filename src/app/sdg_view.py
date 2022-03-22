@@ -11,45 +11,25 @@ def show_sdg_view(conn, sdg_id, max_results):
     sdgs = preload_sdgs()
 
     # Get primary results from TigerGraph
-    results = conn.runInstalledQuery('SDG_Expansion', {'sdg': sdg_id, 'max_results' : max_results})
+    results = preload_query(conn, sdg_id, max_results)
     page_sdg = get_current_sdg(sdgs, results)
 
-    #
-    # Write title/info
-    #
     write_titles(page_sdg)
-
-    #
-    # Write Topics
-    st.header('Related Topics')
-    st.markdown(f'These topics are groups of words and concepts that frequently occur alongside SDG {page_sdg.goal_num}')
-    topics = []
-    for topic in results[4]['Topics']:
-        topics.append('- ' + ', '.join(topic['attributes']['terms']))
-    st.markdown('\n'.join(topics))
-
     write_sdgs(page_sdg, sdgs, results)
-
-    #
-    # Write Documents
-    st.header('Documents')
-    for doc in results[1]['Documents']:
-        
-        st.markdown(f'''
-            ---------
-            ##### {doc['attributes']['title']}
-            {doc['attributes']['summary']}
-            - **{doc['attributes']['year']}** [{doc['attributes']['organization']}]({doc['attributes']['aboutURL']})
-            - **Download** [{doc['attributes']['localFilename']}]({doc['attributes']['downloadURL']})
-        ''')
-
-    st.write(results)
+    write_topics(page_sdg, results)
+    write_documents(page_sdg, results)
+    write_entities(page_sdg, results)
 
 
 @st.cache
 def preload_sdgs():
     # Return a Dictionary of SDGs
     return dict([(sdg.goal_num, sdg) for sdg in load_sdgs()])
+
+
+@st.cache
+def preload_query(conn, sdg_id, max_results):
+    return conn.runInstalledQuery('SDG_Expansion', {'sdg': sdg_id, 'max_results' : max_results})
 
 
 def get_current_sdg(sdgs, results):
@@ -65,9 +45,10 @@ def write_titles(sdg):
     st.sidebar.markdown(sdg.goal)
 
     st.sidebar.markdown('''
-        - [Related Topics](#related-topics)
         - [Related SDGs](#related-sdgs)
-        - [Documents](#documents)
+        - [Related Topics](#related-topics)
+        - [Related Documents](#related-documents)
+        - [Related Entities](#related-entities)
     ''')
 
 
@@ -76,6 +57,7 @@ def write_sdgs(page_sdg, all_sdgs, results):
     # Write Related SDGs
     #
     st.header('Related SDGs')
+    st.markdown(f'These other SDGs are related to SDG {page_sdg.goal_num}')
 
     documents = dict([
         (d['attributes']['id'], d['attributes']) for d in results[1]['Documents']
@@ -86,10 +68,10 @@ def write_sdgs(page_sdg, all_sdgs, results):
             
             s = all_sdgs[result["v_id"]]
             paragraphs = sorted(result['attributes']['@relatedParagraphs'], key = lambda x: x['similarity'], reverse = True)
-            st.markdown(f'###### {s.goal_num} - {s.goal} _({len(paragraphs)} paragraphs)_')    
+            st.markdown(f'###### {s.goal_num} - {s.goal}')    
 
-            with st.expander('Explore from here...'):
-                st.markdown(f'Explore **SDG [{s.goal_num}](./?sdg={s.goal_num}) - {s.goal}**')
+            with st.expander(f'SDG {page_sdg.goal_num} and {s.goal_num} are linked via {len(paragraphs)} paragraphs. Read more...'):
+                st.markdown(f'[Click here to explore SDG {s.goal_num}](./?sdg={s.goal_num})')
                 for paragraph in paragraphs[:5]:
 
                     ids = paragraph['paragraph_id'].split('.')
@@ -97,11 +79,72 @@ def write_sdgs(page_sdg, all_sdgs, results):
                     page_number = ids[1][2:]
                     if document_id in documents:
                         st.markdown(f'''
-                            {paragraph["text"]}
-                            [{documents[document_id]["organization"]}, {documents[document_id]["title"]}, Page {page_number}](./?doc={document_id})''')
+                            - {paragraph["text"]} [{documents[document_id]["title"]} ({documents[document_id]["organization"]}, Page {page_number})](./?doc={document_id})''')
                     else:
                         st.markdown(f'''
-                            {paragraph["text"]}
-                            [Document {document_id}, Page {page_number}](./?doc={document_id})''')
+                            - {paragraph["text"]} [Document {document_id} (Page {page_number})](./?doc={document_id})''')
 
-                 
+
+def write_topics(page_sdg, results):
+    #
+    # Write Topics
+    #
+    st.header('Related Topics')
+    st.markdown(f'These topics are groups of words and concepts that are related to SDG {page_sdg.goal_num}')
+    
+    documents = dict([
+        (d['attributes']['id'], d['attributes']) for d in results[1]['Documents']
+    ])
+
+    for result in results[4]['Topics']:
+        paragraphs = sorted(result['attributes']['@relatedParagraphs'], key = lambda x: x['similarity'], reverse = True)
+        st.markdown(f'###### {", ".join(result["attributes"]["terms"])}')    
+
+        with st.expander(f'SDG {page_sdg.goal_num} is linked to this topic via {len(paragraphs)} paragraphs. Read more...'):
+
+            for paragraph in paragraphs[:5]:
+
+                ids = paragraph['paragraph_id'].split('.')
+                document_id = ids[0]
+                page_number = ids[1][2:]
+                if document_id in documents:
+                    st.markdown(f'''
+                        - {paragraph["text"]} [{documents[document_id]["title"]} ({documents[document_id]["organization"]}, Page {page_number})](./?doc={document_id})''')
+                else:
+                    st.markdown(f'''
+                        - {paragraph["text"]} [Document {document_id} (Page {page_number})](./?doc={document_id})''')                 
+
+
+def write_documents(page_sdg, results):
+    #
+    # Write Documents
+    #
+    st.header('Related Documents')
+    st.markdown(f'These documents are related to SDG {page_sdg.goal_num}')
+
+    for doc in results[1]['Documents']:
+        
+        st.markdown(f"###### {doc['attributes']['title']} ({doc['attributes']['organization']}, {doc['attributes']['year']})")    
+        with st.expander(f"SDG {page_sdg.goal_num} is linked to this document via {doc['attributes']['@visitCount']} sentences. Read more..."):
+
+            st.markdown(f"""
+                [Click here to explore SDGs in this document](./?doc={doc['attributes']['id']})
+
+                > {doc['attributes']['summary']}
+                - **Year** {doc['attributes']['year']}
+                - **Visit** [{doc['attributes']['organization']}]({doc['attributes']['aboutURL']})
+                - **Download Raw Document** [{doc['attributes']['localFilename']}]({doc['attributes']['downloadURL']})
+            """)
+
+def write_entities(page_sdg, results):
+    #
+    # Write Entities
+    #
+    st.header('Related Entities')
+    st.markdown(f'These entities are extracted from paragraphs related to SDG {page_sdg.goal_num}')
+
+    entities = []
+    for entity in results[3]['Entities']:
+        entities.append(f"- [{entity['attributes']['text']} ({entity['attributes']['@visitCount']} mentions)](./entity={entity['attributes']['id']})")
+        
+    st.markdown('\n'.join(sorted(entities)))
