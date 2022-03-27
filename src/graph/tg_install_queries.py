@@ -100,8 +100,8 @@ CREATE QUERY SDG_Expansion(VERTEX<SDG> sdg, INT max_results) FOR GRAPH UNSDGs {{
   SumAccum<INT> @visitCount;
   ListAccum<PARAGRAPH_SDG_RECORD> @relatedParagraphs;
   SDGs = SELECT s2
-                FROM Start:s1 -(is_similar:sim1)- Sentence:st -()- Paragraph:p -()- Sentence:st -(is_similar:sim2)- SDG:s2
-                WHERE sim1.similarity > 0.6 AND sim2.similarity > 0.6
+                FROM Start:s1 -(is_similar:sim1)- Sentence:st1 -()- Paragraph:p -()- Sentence:st2 -(is_similar:sim2)- SDG:s2
+                WHERE s1 != s2 AND sim1.similarity > 0.6 AND sim2.similarity > 0.6
                 ACCUM
                   s2.@avgSimilarity += (sim1.similarity + sim2.similarity) / 2,
                   s2.@visitCount += 1,
@@ -205,3 +205,175 @@ CREATE QUERY Sentence_Expansion(SET<VERTEX<Sentence>> sentences, INT max_results
 INSTALL QUERY Sentence_Expansion
 '''))
 
+
+print(conn.gsql(f'''
+USE GRAPH {config.GRAPH_NAME}
+CREATE QUERY Build_Comention_Edges() FOR GRAPH UNSDGs SYNTAX V2 {{ 
+  
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Count the number of Paragraphs
+  # This will be the denominator in the new
+  # co_mention edge weight
+  SumAccum<INT> @@paragraphCount;
+  result = SELECT p
+                FROM Document:d -()- Paragraph:p
+                ACCUM
+                  @@paragraphCount += 1;
+  
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Delete Old Edges
+  result = SELECT a FROM SDG:a -(co_mention:c)- Topic:b ACCUM DELETE (c);
+  result = SELECT a FROM SDG:a -(co_mention:c)- Entity:b ACCUM DELETE (c);
+  result = SELECT a FROM Topic:a -(co_mention:c)- Entity:b ACCUM DELETE (c);
+  result = SELECT a FROM SDG:a -(co_mention:c)- SDG:b ACCUM DELETE (c);
+  result = SELECT a FROM Entity:a -(co_mention:c)- Entity:b ACCUM DELETE (c);
+  # Note: there's no Topic -()- Topic Edge because the NLP/Topic-modelling step
+  # only associates 1-topic per Paragraph
+  
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  SumAccum<FLOAT> @visitCountA;
+  SetAccum<VERTEX<SDG>> @srcNodesA;
+
+  # Build SDG to Topic edges
+  result = SELECT t
+            FROM SDG:s1 -(is_similar:sim)- Sentence:st -()- Paragraph:p -()- Topic:t
+            WHERE sim.similarity > 0.6
+            ACCUM
+              t.@visitCountA += 1.0,
+              t.@srcNodesA += s1
+            POST-ACCUM FOREACH x in t.@srcNodesA DO
+              INSERT INTO co_mention (FROM, TO, weight) VALUES (x, t, t.@visitCountA / (@@paragraphCount * 1.0))
+            END;
+ 
+  # Build SDG to Entity edges
+  result = SELECT e
+            FROM SDG:s1 -(is_similar:sim)- Sentence:st -()- Paragraph:p -()- Mention:m -()- Entity:e
+            WHERE sim.similarity > 0.6
+            ACCUM
+              e.@visitCountA += 1.0,
+              e.@srcNodesA += s1
+            POST-ACCUM FOREACH x in e.@srcNodesA DO
+              INSERT INTO co_mention (FROM, TO, weight) VALUES (x, e, e.@visitCountA / (@@paragraphCount * 1.0))
+            END;
+  
+  # Build Entity to Topic edges
+  # Entity nodes already have a visitCount and srcNodes (coming from SDGs),
+  # so we need new accumulators for this step
+  SumAccum<FLOAT> @visitCountB;
+  SetAccum<VERTEX<Topic>> @srcNodesB;
+  
+  result = SELECT e
+            FROM Topic:t -()- Paragraph:p -()- Mention:m -()- Entity:e
+            ACCUM
+              e.@visitCountB += 1.0,
+              e.@srcNodesB += t
+            POST-ACCUM FOREACH x in e.@srcNodesB DO
+              INSERT INTO co_mention (FROM, TO, weight) VALUES (x, e, e.@visitCountB / (@@paragraphCount * 1.0))
+            END;
+  
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Build SDG to SDG edges (where a single Paragraph links to multiple SDGs)
+  SumAccum<FLOAT> @visitCountC;
+  SetAccum<VERTEX<SDG>> @srcNodesC;
+  
+  result = SELECT s2
+            FROM SDG:s1 -(is_similar:sim1)- Sentence:st1 -()- Paragraph:p -()- Sentence:st2 -(is_similar:sim2)-  SDG:s2
+            WHERE sim1.similarity > 0.6 AND sim2.similarity > 0.6 AND s1 != s2
+            ACCUM
+              s2.@visitCountC += 1.0,
+              s2.@srcNodesC += s1
+            POST-ACCUM FOREACH x in s2.@srcNodesC DO
+              INSERT INTO co_mention (FROM, TO, weight) VALUES (x, s2, s2.@visitCountC / (@@paragraphCount * 1.0))
+            END;
+  
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Build Entity to Entity edges (where a single Paragraph links to multiple Entities)
+  SumAccum<FLOAT> @visitCountD;
+  SetAccum<VERTEX<Entity>> @srcNodesD;
+  
+  result = SELECT e2
+            FROM Entity:e1 -()- Mention:m1 -()- Paragraph:p -()- Mention:m2 -()- Entity:e2
+            WHERE e1 != e2
+            ACCUM
+              e2.@visitCountD += 1.0,
+              e2.@srcNodesD += e1
+            POST-ACCUM FOREACH x in e2.@srcNodesD DO
+              INSERT INTO co_mention (FROM, TO, weight) VALUES (x, e2, e2.@visitCountD / (@@paragraphCount * 1.0))
+            END;
+}}
+INSTALL QUERY Build_Comention_Edges
+'''))
+
+
+# Label Propagaion from the TigerGraph Data Science Library
+# https://docs.tigergraph.com/graph-ml/current/community-algorithms/label-propagation
+print(conn.gsql(f'''
+USE GRAPH {config.GRAPH_NAME}
+CREATE QUERY tg_label_prop (SET<STRING> v_type, SET<STRING> e_type, INT max_iter, INT output_limit, 
+  BOOL print_accum = TRUE, STRING file_path = "", STRING attr = "") FOR GRAPH UNSDGs  SYNTAX V1 {{
+
+  # Partition the vertices into communities, according to the Label Propagation method.
+  # Indicate community membership by assigning each vertex a community ID.
+
+  OrAccum @@or_changed = true;
+  MapAccum<INT, INT> @map;     # <communityId, numNeighbors>
+  MapAccum<INT, INT> @@comm_sizes_map;   # <communityId, members>
+  SumAccum<INT> @sum_label, @sum_num;  
+  FILE f (file_path);
+  Start = {{v_type}};
+
+  # Assign unique labels to each vertex
+  Start = SELECT s 
+          FROM Start:s 
+          ACCUM s.@sum_label = getvid(s);
+
+  # Propagate labels to neighbors until labels converge or the max iterations is reached
+  WHILE @@or_changed == true LIMIT max_iter DO
+      @@or_changed = false;
+      Start = SELECT s 
+              FROM Start:s -(e_type:e)- :t
+              ACCUM t.@map += (s.@sum_label -> 1)  # count the occurrences of neighbor's labels
+              POST-ACCUM
+                  INT max_v = 0,
+                  INT label = 0,
+                  # Iterate over the map to get the neighbor label that occurs most often
+                  FOREACH (k,v) IN t.@map DO
+                      CASE WHEN v > max_v THEN
+                          max_v = v,
+                          label = k
+                      END
+                  END,
+                  # When the neighbor search finds a label AND it is a new label
+                  # AND the label's count has increased, update the label.
+                  CASE WHEN label != 0 AND t.@sum_label != label AND max_v > t.@sum_num THEN
+                      @@or_changed += true,
+                      t.@sum_label = label,
+                      t.@sum_num = max_v
+                  END,
+                  t.@map.clear();
+  END;
+
+  Start = {{v_type}};
+  Start =  SELECT s 
+          FROM Start:s
+          POST-ACCUM 
+              IF attr != "" THEN 
+                  s.setAttr(attr, s.@sum_label) 
+              END,
+                
+              IF file_path != "" THEN 
+                  f.println(s, s.@sum_label) 
+              END,
+                
+              IF print_accum THEN 
+                  @@comm_sizes_map += (s.@sum_label -> 1) 
+              END
+          LIMIT output_limit;
+
+  IF print_accum THEN 
+      PRINT @@comm_sizes_map;
+      PRINT Start[Start.@sum_label];
+  END;
+}}
+INSTALL QUERY tg_label_prop
+'''))
