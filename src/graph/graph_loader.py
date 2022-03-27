@@ -56,5 +56,10 @@ def build_comention_edges():
     print(json.dumps(res, indent=2))
 
 
+def run_community_detection():
+    res = conn.runInstalledQuery('tg_label_prop', params='v_type=Entity&v_type=Topic&v_type=SDG&e_type=co_mention&wt_attr=weight&max_iter=30&output_limit=100&print_accum=true&attr=lid')
+    print(json.dumps(res, indent=2))
+
+
 if __name__ == "__main__":
     main()
