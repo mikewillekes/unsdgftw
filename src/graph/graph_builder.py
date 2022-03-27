@@ -82,7 +82,9 @@ def stage_nodes(document_collection_name):
             paragraphs = load_paragraph_metadata(paragraph_metadata_filename)
             for paragraph in paragraphs:
                 for entity in paragraph.entities:
-                    writer.writerow([entity.id, entity.text, entity.label])
+                    # the 0 at the end is a placeholder for the lid ("label-id") that will
+                    # be calculated later via label propagation community detection algorithm
+                    writer.writerow([entity.id, entity.text, entity.label, 0])
 
 
     with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.SDG_NODES}', mode='w') as f:
@@ -92,13 +94,17 @@ def stage_nodes(document_collection_name):
             sdgs[sdg.goal_category_num] = f'{sdg.goal_category_short}, {sdg.goal_category_long}'
             sdgs[sdg.goal_num] = f'{sdg.goal}'
         for (k,v) in sdgs.items():
-             writer.writerow([k, v])
+            # the 0 at the end is a placeholder for the lid ("label-id") that will
+            # be calculated later via label propagation community detection algorithm
+            writer.writerow([k, v, 0])
 
 
     with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.TOPIC_NODES}', mode='w') as f:
         writer = build_writer(f, ['paragraph', 'id', 'probability', 'topic', 'term1', 'term2', 'term3', 'term4', 'term5', 'term6', 'term7', 'term8', 'term9', 'term10'])
         for topic in load_topic_metadata(config.get_topic_metadata_filename(document_collection_name)):
-            row = list([topic.paragraph_id, topic.id, topic.topic_probability, topic.topic_number])
+            # the 0 at the end is a placeholder for the lid ("label-id") that will
+            # be calculated later via label propagation community detection algorithm
+            row = list([topic.paragraph_id, topic.id, topic.topic_probability, topic.topic_number, 0])
             row.extend([t for t in topic.terms])
             writer.writerow(row)
 

@@ -44,7 +44,7 @@ CREATE UNDIRECTED EDGE has_paragraph(FROM Document, TO Paragraph)
 CREATE UNDIRECTED EDGE has_document(FROM Corpus, TO Document)
 CREATE UNDIRECTED EDGE is_similar(FROM Sentence, TO SDG, similarity FLOAT DEFAULT "0.0")
 CREATE UNDIRECTED EDGE has_topic(FROM Paragraph, TO Topic, probability FLOAT DEFAULT "0.0")
-CREATE UNDIRECTED EDGE co_mention(FROM Entity, TO Entity|FROM SDG, TO Entity|FROM SDG, TO SDG|FROM SDG, TO Topic|FROM Topic, TO Entity, weight FLOAT DEFAULT "0.0");
+CREATE UNDIRECTED EDGE co_mention(FROM Entity, TO Entity|FROM SDG, TO Entity|FROM SDG, TO SDG|FROM SDG, TO Topic|FROM Topic, TO Entity, weight FLOAT DEFAULT "0.0")
 '''))
 
 #
@@ -65,7 +65,7 @@ print(conn.gsql('DROP JOB schema_change_job_AddAttributeIndex'))
 print(conn.gsql(f'''
 CREATE GRAPH {config.GRAPH_NAME}(
   Mention, Corpus, Document, Paragraph, Sentence, Entity, SDG, Topic,
-  has_entity, has_mention, has_sentence, has_paragraph, has_document, is_similar, has_topic
+  has_entity, has_mention, has_sentence, has_paragraph, has_document, is_similar, has_topic, co_mention
 )'''))
 
 
@@ -119,7 +119,7 @@ print(conn.gsql(f'''
 USE GRAPH {config.GRAPH_NAME}
 CREATE LOADING JOB load_job_sdg_nodes_csv FOR GRAPH {config.GRAPH_NAME} {{
       DEFINE FILENAME MyDataSource;
-      LOAD MyDataSource TO VERTEX SDG VALUES($0, $1) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO VERTEX SDG VALUES($0, $1, $2) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
 }}'''))
 
 print(conn.gsql(f'''
@@ -133,14 +133,14 @@ print(conn.gsql(f'''
 USE GRAPH {config.GRAPH_NAME}
 CREATE LOADING JOB load_job_entity_nodes_csv FOR GRAPH {config.GRAPH_NAME} {{
       DEFINE FILENAME MyDataSource;
-      LOAD MyDataSource TO VERTEX Entity VALUES($0, $1, $2) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO VERTEX Entity VALUES($0, $1, $2, $3) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
 }}'''))
 
 print(conn.gsql(f'''
 USE GRAPH {config.GRAPH_NAME}
 CREATE LOADING JOB load_job_topic_nodes_csv FOR GRAPH {config.GRAPH_NAME} {{
       DEFINE FILENAME MyDataSource;
-      LOAD MyDataSource TO VERTEX Topic VALUES($1, $3, SET($4, $5, $6, $7, $8, $9, $10, $11, $12, $13)) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO VERTEX Topic VALUES($1, $3, SET($5, $6, $7, $8, $9, $10, $11, $12, $13, $14), $4) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
 }}'''))
 
 print(conn.gsql(f'''

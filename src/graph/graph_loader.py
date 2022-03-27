@@ -50,5 +50,11 @@ def load_file(document_collection_name, filename, tg_job_name):
         jobName=tg_job_name)
     print(json.dumps(res, indent=2))
 
+
+def build_comention_edges():
+    res = conn.runInstalledQuery('Build_Comention_Edges')
+    print(json.dumps(res, indent=2))
+
+
 if __name__ == "__main__":
     main()
