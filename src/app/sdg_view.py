@@ -1,4 +1,3 @@
-from posixpath import split
 import streamlit as st
 import pyTigerGraph as tg
 

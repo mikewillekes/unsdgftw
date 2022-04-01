@@ -21,7 +21,7 @@ conn = tg.TigerGraphConnection(
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # NOTE: ONLY UNCOMMENT FOR EMERGENCIES!! IT WILL DELETE EVERYTHING FROM YOUR GRAPH!
-#print(conn.gsql('''DROP ALL'''))
+print(conn.gsql('''DROP ALL'''))
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #
@@ -33,9 +33,9 @@ CREATE VERTEX Corpus(PRIMARY_ID id STRING, organization STRING, sourceURL STRING
 CREATE VERTEX Document(PRIMARY_ID id STRING, organization STRING, localFilename STRING, aboutURL STRING, downloadURL STRING, title STRING, summary STRING, year INT) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
 CREATE VERTEX Paragraph(PRIMARY_ID id STRING, pageNumber INT, paragraphNumber INT, paragraphLen INT, text STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
 CREATE VERTEX Sentence(PRIMARY_ID id STRING, text STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
-CREATE VERTEX Entity(PRIMARY_ID id STRING, text STRING, entityType STRING, lid INT) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
-CREATE VERTEX SDG(PRIMARY_ID id STRING, text STRING, lid INT) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
-CREATE VERTEX Topic(PRIMARY_ID id STRING, topic INT, terms SET<STRING>, lid INT) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Entity(PRIMARY_ID id STRING, text STRING, entityType STRING, lid INT, cent FLOAT) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX SDG(PRIMARY_ID id STRING, text STRING, lid INT, cent FLOAT) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Topic(PRIMARY_ID id STRING, topic INT, terms SET<STRING>, lid INT, cent FLOAT) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
 
 CREATE UNDIRECTED EDGE has_entity(FROM Mention, TO Entity)
 CREATE UNDIRECTED EDGE has_mention(FROM Paragraph, TO Mention)
@@ -119,7 +119,7 @@ print(conn.gsql(f'''
 USE GRAPH {config.GRAPH_NAME}
 CREATE LOADING JOB load_job_sdg_nodes_csv FOR GRAPH {config.GRAPH_NAME} {{
       DEFINE FILENAME MyDataSource;
-      LOAD MyDataSource TO VERTEX SDG VALUES($0, $1, $2) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO VERTEX SDG VALUES($0, $1, $2, $3) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
 }}'''))
 
 print(conn.gsql(f'''
@@ -133,14 +133,14 @@ print(conn.gsql(f'''
 USE GRAPH {config.GRAPH_NAME}
 CREATE LOADING JOB load_job_entity_nodes_csv FOR GRAPH {config.GRAPH_NAME} {{
       DEFINE FILENAME MyDataSource;
-      LOAD MyDataSource TO VERTEX Entity VALUES($0, $1, $2, $3) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO VERTEX Entity VALUES($0, $1, $2, $3, $4) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
 }}'''))
 
 print(conn.gsql(f'''
 USE GRAPH {config.GRAPH_NAME}
 CREATE LOADING JOB load_job_topic_nodes_csv FOR GRAPH {config.GRAPH_NAME} {{
       DEFINE FILENAME MyDataSource;
-      LOAD MyDataSource TO VERTEX Topic VALUES($1, $3, SET($5, $6, $7, $8, $9, $10, $11, $12, $13, $14), $4) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO VERTEX Topic VALUES($1, $3, SET($6, $7, $8, $9, $10, $11, $12, $13, $14, $15), $4, $5) USING SEPARATOR=",", HEADER="true", EOL="\n", QUOTE="double";
 }}'''))
 
 print(conn.gsql(f'''

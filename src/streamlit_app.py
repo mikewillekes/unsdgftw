@@ -8,6 +8,7 @@ import pyTigerGraph as tg
 
 # Local application imports
 from config import config
+from app.default_view import show_default_view
 from app.document_view import show_document_view
 from app.sdg_view import show_sdg_view
 
@@ -26,12 +27,6 @@ conn = tg.TigerGraphConnection(
     graphname=f'{config.GRAPH_NAME}', 
     apiToken=f'{os.environ.get("tg_token")}')
 
-#st.sidebar.write(conn.echo())
-#st.sidebar.markdown("check out this [link](./?sdg=1.2)")
-
-def show_default_view():
-    st.title('Default')
-
 def show_entity_page(entity_id):
     st.title(f'Entity {entity_id}')
 #
@@ -47,7 +42,7 @@ def show_entity_page(entity_id):
 query_parameters = st.experimental_get_query_params()
 
 if len(query_parameters) == 0 or len(query_parameters) > 1:
-    show_default_view()
+    show_default_view(conn)
 
 elif 'doc' in query_parameters:
     show_document_view(conn, query_parameters['doc'][0], 25)

@@ -1,4 +1,5 @@
-import os 
+import os
+import json
 from dotenv import load_dotenv
 import pyTigerGraph as tg
 
@@ -29,8 +30,8 @@ print(conn.echo())
 # Note: on TG Free Tier - the running solution is automatically stopped after ~1hr of idle.
 #       Make sure it's actually running before freaking out about connections errors
 #
-results = conn.getInstalledQueries()
-print(results)
+#results = conn.getInstalledQueries()
+#print(results)
 
 #results = conn.runInstalledQuery('Document_Expansion', {'doc': '3649ae7f73d8cabf69d27e91ae7b28d6d6def898b0d8ffb21c38f4d6f8387308', 'max_results' : 5})
 #print(results)
@@ -46,25 +47,23 @@ print(results)
 
 #results = conn.runInstalledQuery('tg_louvain', {'v_type': ['Paragraph', 'Topic', 'Mention', 'Entity', 'Sentence', 'SDG'], 'e_type': ['has_topic', 'has_mention', 'has_entity', 'has_sentence', 'is_similar'], 'wt_attr': '', 'max_iter': 10, 'result_attr': '', 'file_path': '', 'print_info': False})
 
-params = {
-    'v_type': ['Entity'],
-    'e_type': 'co_mention',
-    'wt_attr': 'weight',
-    'max_iter': 10,
-    'output_limit': 100,
-    'print_accum': True,
-    'attr': 'lid'
-}
-
-#results = conn.runInstalledQuery('tg_label_prop', params, usePost=True)
-
-#results = conn.runInstalledQuery('tg_label_prop', params={'v_type': ['Entity','Topic','SDG'], 'e_type': 'co_mention'})
+#results = conn.runInstalledQuery('tg_label_prop', params='v_type=Entity&v_type=Topic&v_type=SDG&e_type=co_mention&wt_attr=weight&max_iter=30&output_limit=100&print_accum=true&attr=lid')
+#print(results)
 
 
-#results = conn.runInstalledQuery('tg_label_prop', params='v_type=Entity&v_type=Topic&e_type=co_mention')
+# results = conn.runInterpretedQuery(f'''
+# INTERPRET QUERY () FOR GRAPH {config.GRAPH_NAME} {{ 
 
-results = conn.runInstalledQuery('tg_label_prop', params='v_type=Entity&v_type=Topic&v_type=SDG&e_type=co_mention&wt_attr=weight&max_iter=30&output_limit=100&print_accum=true&attr=lid')
+# MapAccum<STRING, INT> @@graphStatsAccum;
+# results = SELECT d
+#             FROM Corpus:c -()- Document:d
+#             ACCUM
+#                 @@graphStatsAccum += (c.sourceURL -> 1);
 
+# PRINT @@graphStatsAccum;
+# }}
+# ''')
+# print(results)
 
-print(results)
-
+res = conn.runInstalledQuery('tg_closeness_cent', params='v_type=Entity&v_type=Topic&v_type=SDG&e_type=co_mention&re_type=co_mention&max_hops=10&top_k=100&wf=true&print_accum=true&result_attr=cent&display_edges=false', timeout=600000)
+print(json.dumps(res, indent=2))

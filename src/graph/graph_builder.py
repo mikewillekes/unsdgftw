@@ -84,7 +84,7 @@ def stage_nodes(document_collection_name):
                 for entity in paragraph.entities:
                     # the 0 at the end is a placeholder for the lid ("label-id") that will
                     # be calculated later via label propagation community detection algorithm
-                    writer.writerow([entity.id, entity.text, entity.label, 0])
+                    writer.writerow([entity.id, entity.text, entity.label, 0, 0.0])
 
 
     with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.SDG_NODES}', mode='w') as f:
@@ -96,7 +96,7 @@ def stage_nodes(document_collection_name):
         for (k,v) in sdgs.items():
             # the 0 at the end is a placeholder for the lid ("label-id") that will
             # be calculated later via label propagation community detection algorithm
-            writer.writerow([k, v, 0])
+            writer.writerow([k, v, 0, 0.0])
 
 
     with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.TOPIC_NODES}', mode='w') as f:
@@ -104,7 +104,7 @@ def stage_nodes(document_collection_name):
         for topic in load_topic_metadata(config.get_topic_metadata_filename(document_collection_name)):
             # the 0 at the end is a placeholder for the lid ("label-id") that will
             # be calculated later via label propagation community detection algorithm
-            row = list([topic.paragraph_id, topic.id, topic.topic_probability, topic.topic_number, 0])
+            row = list([topic.paragraph_id, topic.id, topic.topic_probability, topic.topic_number, 0, 0.0])
             row.extend([t for t in topic.terms])
             writer.writerow(row)
 

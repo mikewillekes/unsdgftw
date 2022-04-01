@@ -1,6 +1,6 @@
 # Local application imports
 from graph.graph_builder import stage_graph_data
-from graph.graph_loader import load_graph_data, build_comention_edges, run_community_detection
+from graph.graph_loader import *
 
 
 def main():
@@ -25,6 +25,10 @@ def main():
     # Run community detection on the 
     # SDG, Entity and Topic nodes 
     run_community_detection()
+
+    # Compute centrality on the 
+    # SDG, Entity and Topic nodes 
+    run_centrality()
 
 if __name__ == "__main__":
     main()
