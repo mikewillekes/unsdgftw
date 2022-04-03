@@ -313,89 +313,27 @@ USE GRAPH {config.GRAPH_NAME}
 CREATE QUERY Homepage(INT max_results) FOR GRAPH {config.GRAPH_NAME} {{ 
   
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Step 1: Get all the clusters (from the label ID attribute: 'lid')
-  SetAccum<INT> @@clusters;
-  results = SELECT s1
-              FROM SDG:s1
-              ACCUM
-                @@clusters += s1.lid;
+  SDGs = SELECT s
+              FROM SDG:s
+              ORDER BY s.cent DESC;
+  
+  PRINT(SDGs);
   
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # For Each cluster get the SDGs and top N Topics and top N Entities
-  # (where order is determined by a previous run of Centrality algorithm)
+  Entities = SELECT e
+              FROM Entity:e
+              ORDER BY e.cent DESC
+              LIMIT max_results;
   
-  MapAccum<INT, ListAccum<VERTEX<Topic>>> @@topicsByCluster;
-  SetAccum<VERTEX<Topic>> @@topics;
-  
-  MapAccum<INT, ListAccum<VERTEX<Entity>>> @@entitiesByCluster;
-  SetAccum<VERTEX<Entity>> @@entities;
-
-  MapAccum<INT, ListAccum<VERTEX<SDG>>> @@sdgsByCluster;
-  SetAccum<VERTEX<SDG>> @@sdgs;
-  
-  FOREACH cluster in @@clusters DO
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Topics
-    top_N_topics = SELECT t 
-                    FROM Topic:t
-                    WHERE t.lid == cluster 
-                    ORDER BY t.cent DESC LIMIT max_results;
-    
-    res = SELECT t
-          FROM top_N_topics:t
-          ACCUM
-            @@topicsByCluster += (cluster -> t),
-            @@topics += t;
-    
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Entites  
-    top_N_entities = SELECT e 
-                    FROM Entity:e
-                    WHERE e.lid == cluster 
-                    ORDER BY e.cent DESC LIMIT max_results;
-    
-    res = SELECT e
-          FROM top_N_entities:e
-          ACCUM
-            @@entitiesByCluster += (cluster -> e),
-            @@entities += e;
-  
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # SDGs  
-    top_N_sdgs = SELECT s 
-                    FROM SDG:s
-                    WHERE s.lid == cluster 
-                    ORDER BY s.cent DESC LIMIT max_results;
-    
-    res = SELECT s
-          FROM top_N_sdgs:s
-          ACCUM
-            @@sdgsByCluster += (cluster -> s),
-            @@sdgs += s;
-  
-  END;
+  PRINT(Entities);
   
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Print/Return Topics
-  Start = @@topics;
-  Topics = SELECT t FROM Start:t;
-  PRINT Topics;
-  PRINT @@topicsByCluster;
+  Topics = SELECT t
+              FROM Topic:t
+              ORDER BY t.cent DESC
+              LIMIT max_results;
   
-  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Print/Return Entities
-  Start = @@entities;
-  Entities = SELECT e FROM Start:e;
-  PRINT Entities;
-  PRINT @@entitiesByCluster;
-  
-  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Print/Return SDGs
-  Start = @@sdgs;
-  SDGs = SELECT s FROM Start:s;
-  PRINT SDGs;
-  PRINT @@sdgsByCluster;
+  PRINT(Topics);
   
 }}
 INSTALL QUERY Homepage
