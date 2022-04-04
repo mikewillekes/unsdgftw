@@ -8,6 +8,12 @@ from sdgs.sustainable_development_goals import *
 
 def show_default_view(conn):
 
+    st.set_page_config(
+        page_title='Sustainable Development Goals',
+        page_icon=':earth_africa:',
+        layout='wide',
+        initial_sidebar_state='auto')
+        
     sdgs = preload_sdgs()
     
     write_sidebar_stats(conn)
@@ -67,6 +73,29 @@ def get_summary_stats(conn):
 
 
 @st.cache
+def get_page_count(conn):
+    results = conn.runInterpretedQuery(f'''
+    INTERPRET QUERY () FOR GRAPH {config.GRAPH_NAME} {{ 
+    
+    MaxAccum<INT> @maxPage;
+    res = SELECT d 
+            FROM Document:d -()- Paragraph:p
+            ACCUM
+                d.@maxPage += p.pageNumber;
+            
+    SumAccum<INT> @@totalPages;
+    res = SELECT c 
+            FROM Corpus:c -()- Document:d
+            ACCUM
+                @@totalPages += d.@maxPage;
+    
+    PRINT @@totalPages;
+    }}
+    ''')
+    return results[0]['@@totalPages']
+
+
+@st.cache
 def preload_homepage_query(conn, max_results):
     return conn.runInstalledQuery('Homepage', {'max_results' : max_results})
 
@@ -74,10 +103,11 @@ def preload_homepage_query(conn, max_results):
 def write_sidebar_stats(conn):
 
     stats = get_summary_stats(conn)
+    pages = get_page_count(conn)
 
     # Write summary results into Sidebar
     st.sidebar.header(f'Data Sources')
-    st.sidebar.caption(f'{sum(stats.values())} documents from across these datasets:')
+    st.sidebar.caption(f'Exploring {pages} pages from {sum(stats.values())} documents from these sources')
     st.sidebar.markdown('\n'.join([f'- {k}' for k in stats.keys()]))
 
 

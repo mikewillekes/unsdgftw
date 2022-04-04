@@ -45,7 +45,7 @@ if len(query_parameters) == 0 or len(query_parameters) > 1:
     show_default_view(conn)
 
 elif 'doc' in query_parameters:
-    show_document_view(conn, query_parameters['doc'][0], 25)
+    show_document_view(conn, query_parameters['doc'][0])
 
 elif 'sdg' in query_parameters:
     show_sdg_view(conn, query_parameters['sdg'][0], 25)

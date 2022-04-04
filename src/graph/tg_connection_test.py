@@ -65,5 +65,8 @@ print(conn.echo())
 # ''')
 # print(results)
 
-res = conn.runInstalledQuery('tg_closeness_cent', params='v_type=Entity&v_type=Topic&v_type=SDG&e_type=co_mention&re_type=co_mention&max_hops=10&top_k=100&wf=true&print_accum=true&result_attr=cent&display_edges=false', timeout=600000)
+#res = conn.runInstalledQuery('tg_closeness_cent', params='v_type=Entity&v_type=Topic&v_type=SDG&e_type=co_mention&re_type=co_mention&max_hops=10&top_k=100&wf=true&print_accum=true&result_attr=cent&display_edges=false', timeout=600000)
+#print(json.dumps(res, indent=2))
+
+res = conn.runInstalledQuery('Document_Distribution', params='doc=3649ae7f73d8cabf69d27e91ae7b28d6d6def898b0d8ffb21c38f4d6f8387308', timeout=600000)
 print(json.dumps(res, indent=2))
