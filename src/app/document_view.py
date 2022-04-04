@@ -10,7 +10,6 @@ from config import config
 
 
 def show_document_view(conn, document_id):
-    st.title(f'Document {document_id}')
     
     results = get_document_distribution(conn, document_id)
     document_summary = results[0]['res'][0]['attributes']
@@ -40,11 +39,13 @@ def show_document_view(conn, document_id):
     rug_text = []
 
     for (k, v) in sdg_dist:
-        positions = sorted([sdg['position'] for sdg in v])
-        if (len(positions) > 1):
+        
+        sorted_values = sorted([sdg for sdg in v], key=lambda x: x['position'])
+        
+        if (len(sorted_values) > 1):
             distribution_labels.append('SDG ' + k)
-            distribution_data.append(positions)
-            rug_text.append('The distplot figure factory displays a combination of statistical representations of\nnumerical data, such as histogram, kernel density\nestimation or normal curve, and rug plot.')
+            distribution_data.append([sdg['position'] for sdg in sorted_values])
+            rug_text.append([sdg['anchor_text'] for sdg in sorted_values])
 
     # Create distplot with custom bin_size
     fig = ff.create_distplot(
@@ -52,8 +53,13 @@ def show_document_view(conn, document_id):
         distribution_labels,
         rug_text=rug_text,
         show_curve=False,
-        
         bin_size=10)
+
+    fig.update_layout(
+        title='Sustainable Development Goals by Page Number',
+        xaxis_title='Page Number',
+        legend_title='SDG'
+    )
 
     # Plot!
     st.plotly_chart(fig, use_container_width=True)

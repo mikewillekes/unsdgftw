@@ -7,12 +7,6 @@ from sdgs.sustainable_development_goals import *
 
 def show_sdg_view(conn, sdg_id, max_results):
 
-    st.set_page_config(
-        page_title=f'SDG {sdg_id}',
-        page_icon=':earth_africa:',
-        layout='wide',
-        initial_sidebar_state='auto')
-
     sdgs = preload_sdgs()
 
     # Get primary results from TigerGraph

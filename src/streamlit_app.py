@@ -27,6 +27,12 @@ conn = tg.TigerGraphConnection(
     graphname=f'{config.GRAPH_NAME}', 
     apiToken=f'{os.environ.get("tg_token")}')
 
+st.set_page_config(
+    page_title=f'Sustainable Development Goals',
+    page_icon=':earth_africa:',
+    layout='wide',
+    initial_sidebar_state='auto')
+
 def show_entity_page(entity_id):
     st.title(f'Entity {entity_id}')
 #

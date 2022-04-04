@@ -7,13 +7,7 @@ from config import config
 from sdgs.sustainable_development_goals import *
 
 def show_default_view(conn):
-
-    st.set_page_config(
-        page_title='Sustainable Development Goals',
-        page_icon=':earth_africa:',
-        layout='wide',
-        initial_sidebar_state='auto')
-        
+       
     sdgs = preload_sdgs()
     
     write_sidebar_stats(conn)
