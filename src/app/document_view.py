@@ -18,7 +18,14 @@ def show_document_view(conn, document_id):
     document_summary = results[0]['res'][0]['attributes']
     document_dist = results[1]['@@dist']
 
-    st.write(document_summary)
+    st.header(document_summary['title'])
+    st.caption(f"{document_summary['organization']}: {document_summary['localFilename']}")
+    st.markdown(f"""
+        > {document_summary['summary']}
+        - **Year** {document_summary['year']}
+        - **Visit Source** [{document_summary['organization']}]({document_summary['aboutURL']})
+        - **Download Raw Document** [{document_summary['localFilename']}]({document_summary['downloadURL']})
+    """)
 
     plot_sdgs(document_dist, sdg_categories)
 

@@ -5,12 +5,12 @@ import pyTigerGraph as tg
 from config import config
 from sdgs.sustainable_development_goals import *
 
-def show_sdg_view(conn, sdg_id, max_results):
+def show_entity_view(conn, entity_id, max_results):
 
     sdgs = preload_sdgs()
 
     # Get primary results from TigerGraph
-    results = preload_query(conn, sdg_id, max_results)
+    results = preload_query(conn, entity_id, max_results)
     page_sdg = get_current_sdg(sdgs, results)
 
     write_titles(page_sdg)
@@ -131,7 +131,7 @@ def write_documents(page_sdg, results):
 
                 > {doc['attributes']['summary']}
                 - **Year** {doc['attributes']['year']}
-                - **Visit Source** [{doc['attributes']['organization']}]({doc['attributes']['aboutURL']})
+                - **Visit** [{doc['attributes']['organization']}]({doc['attributes']['aboutURL']})
                 - **Download Raw Document** [{doc['attributes']['localFilename']}]({doc['attributes']['downloadURL']})
             """)
 

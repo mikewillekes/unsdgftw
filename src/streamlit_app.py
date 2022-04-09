@@ -11,6 +11,7 @@ from config import config
 from app.default_view import show_default_view
 from app.document_view import show_document_view
 from app.sdg_view import show_sdg_view
+from app.entity_view import show_entity_view
 
 load_dotenv()
 
@@ -56,9 +57,5 @@ elif 'doc' in query_parameters:
 elif 'sdg' in query_parameters:
     show_sdg_view(conn, query_parameters['sdg'][0], 25)
 
-
-
-
-
-
-
+elif 'entity' in query_parameters:
+    show_entity_view(conn, query_parameters['entity'][0], 25)
