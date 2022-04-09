@@ -4,6 +4,15 @@ from graph.graph_loader import *
 
 
 def main():
+
+    #
+    # Assumption is that Graph Schema, Loader and Queries have
+    # already been created and installed via:
+    #
+    #   tg_create_schema.py
+    #   tg_install_queries.py
+    #
+
     stage_graph_data('IPBES')
     stage_graph_data('IUCN')
     stage_graph_data('IPCC')

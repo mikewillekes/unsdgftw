@@ -306,8 +306,6 @@ INSTALL QUERY Build_Comention_Edges
 '''))
 
 
-# Closeness Centrality from the TigerGraph Data Science Library
-# https://docs.tigergraph.com/graph-ml/current/centrality-algorithms/closeness-centrality
 print(conn.gsql(f'''
 USE GRAPH {config.GRAPH_NAME}
 CREATE QUERY Homepage(INT max_results) FOR GRAPH {config.GRAPH_NAME} {{ 
@@ -558,4 +556,184 @@ CREATE QUERY tg_closeness_cent(SET<STRING> v_type, SET<STRING> e_type, STRING re
     END;
 }}
 INSTALL QUERY tg_closeness_cent
+'''))
+
+
+print(conn.gsql(f'''
+USE GRAPH {config.GRAPH_NAME}
+CREATE QUERY Document_Distribution(VERTEX<Document> doc) FOR GRAPH {config.GRAPH_NAME} {{ 
+   
+  TYPEDEF TUPLE <FLOAT position, INT visit_count, FLOAT centrality, STRING vertex_id, STRING vertex_type, STRING vertex_label, STRING anchor_text> DOCUMENT_DIST;
+  ListAccum<DOCUMENT_DIST> @@dist;
+  
+  #
+  # For the incoming Document, walk the graph to find linked
+  # Entities, Topics and SDGs 
+  #
+  Start = {{doc}};
+  res = SELECT d 
+          FROM Start:d;
+  
+  PRINT res;
+  
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Step 1
+  # This is a workaround! During the NLP pre-processing steps, 
+  # low-quality paragraphs were diescarded, and we only record Page + 
+  # relative paragraph (i.e. Pg 4, Para 3 == third paragraph on page four)
+  # however this means that we don't have a record of an absolute & continuous
+  # position of paragraphs in the document :( which ideally we'd use 
+  # for a distribution plot.
+  #
+  # Instead we'll sort of fake it by decimal position with the page
+  #
+  MaxAccum<INT> @@maxParagraphNum;
+  res = SELECT p 
+          FROM Start:d -()- Paragraph:p
+          ACCUM
+            @@maxParagraphNum += p.paragraphNumber;
+
+  SumAccum<FLOAT> @position;
+  res = SELECT p
+          FROM Start:d -()- Paragraph:p
+          ACCUM
+            p.@position = (1.0 * p.pageNumber) + ((1.0 * p.paragraphNumber) / (1.0 * @@maxParagraphNum));
+  
+  
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Step 2
+  # Pre-visit each SDG, Entity and Topic so we know how often
+  # they are represented in the document (centrality is pre-calculated,
+  # but it's for the whole graph)
+  
+  SumAccum<INT> @visitCount;
+  res = SELECT s 
+          FROM Start:d -()- Paragraph:p -()- Sentence:st -(is_similar:sim)- SDG:s
+          WHERE sim.similarity > 0.6
+          ACCUM
+              s.@visitCount += 1;
+  
+  res = SELECT t 
+          FROM Start:d -()- Paragraph:p -(has_topic:ht)- Topic:t
+          WHERE ht.probability > 0.6
+          ACCUM
+              t.@visitCount += 1;
+  
+  res = SELECT e 
+          FROM Start:d -()- Paragraph:p -()- Mention:m -()- Entity:e
+          ACCUM
+              e.@visitCount += 1;
+  
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Step 3
+  # Collect all SDGs, Entities and Topics
+  
+  #
+  # SDGs
+  #
+  res = SELECT s
+          FROM Start:d -()- Paragraph:p -()- Sentence:st -(is_similar:sim)- SDG:s
+          WHERE sim.similarity > 0.6
+          ACCUM
+            @@dist += DOCUMENT_DIST(p.@position, s.@visitCount, s.cent, s.id, "SDG", s.text, st.text);
+  
+  # Weird hacky workaround to accumulate the Set<STRING> of topic terms
+  # into a single space-delimited string
+  SetAccum<STRING> @termsSet;
+  SumAccum<STRING> @termsString;
+  res = SELECT t
+          FROM Start:d -()- Paragraph:p -(has_topic:ht)- Topic:t
+          WHERE ht.probability > 0.6
+          ACCUM
+            t.@termsSet += t.terms
+          POST-ACCUM FOREACH x in t.@termsSet DO
+            t.@termsString += x,
+            t.@termsString += " "  
+          END;
+   
+  #
+  # Topics
+  #
+  res = SELECT t
+          FROM Start:d -()- Paragraph:p -(has_topic:ht)- Topic:t
+          WHERE ht.probability > 0.6
+          ACCUM
+            @@dist += DOCUMENT_DIST(p.@position, t.@visitCount, t.cent, t.id, "Topic", t.@termsString, "");
+
+  #
+  # Entities
+  #
+  res = SELECT e
+          FROM Start:d -()- Paragraph:p -()- Mention:m -()- Entity:e
+          ACCUM
+            @@dist += DOCUMENT_DIST(p.@position, e.@visitCount, e.cent, e.id, "Entity", e.text, "");
+  
+  
+  PRINT @@dist;
+}}
+INSTALL QUERY Document_Distribution
+'''))
+
+
+print(conn.gsql(f'''
+USE GRAPH {config.GRAPH_NAME}
+CREATE QUERY Entity_Expansion(VERTEX<Entity> entity, INT max_results) FOR GRAPH {config.GRAPH_NAME} {{ 
+  
+  TYPEDEF TUPLE <STRING paragraph_id, STRING text> PARAGRAPH_ENTITY_RECORD;
+  
+  Start = {{entity}};
+  
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Other highly-similar SDGs 
+  AvgAccum @avgSimilarity;
+  SumAccum<INT> @visitCount;
+  SetAccum<PARAGRAPH_ENTITY_RECORD> @relatedParagraphs;
+  AndAccum @visited;
+  SDGs = SELECT s
+                FROM Start:e -()- Mention:m -()- Paragraph:p -()- Sentence:st2 -(is_similar:sim)- SDG:s
+                WHERE sim.similarity > 0.6 AND NOT p.@visited
+                ACCUM
+                  p.@visited += TRUE,
+                  s.@avgSimilarity += (sim.similarity),
+                  s.@visitCount += 1,
+                  s.@relatedParagraphs += PARAGRAPH_ENTITY_RECORD(p.id, p.text)
+                ORDER BY s.@visitCount DESC
+                LIMIT max_results;
+  
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Documents linked to Paragraphs
+  Documents = SELECT d
+                FROM Start:e -()- Mention:m -()- Paragraph:p -()- Document:d
+                ACCUM
+                  d.@visitCount += 1
+                ORDER BY d.@visitCount DESC
+                LIMIT max_results;
+  
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Other Entities linked by mention in Paragraph
+  Entities = SELECT e2
+              FROM Start:e1 -()- Mention:m1 -()- Paragraph:p -()- Mention:m2 -()- Entity:e2
+              WHERE e1 != e2
+              ACCUM
+                e2.@visitCount += 1
+              ORDER BY e2.@visitCount DESC
+              LIMIT max_results;
+  
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Topics linked by Paragraph
+  Topics = SELECT t
+              FROM Start:e -()- Mention:m -()- Paragraph:p -()- Topic:t
+              ACCUM
+                t.@visitCount += 1,
+                t.@relatedParagraphs += PARAGRAPH_ENTITY_RECORD(p.id, p.text)
+              ORDER BY t.@visitCount DESC
+              LIMIT max_results;
+  
+  PRINT Start;
+  PRINT Documents;
+  PRINT SDGs;
+  PRINT Entities;
+  PRINT Topics;
+}}
+INSTALL QUERY Entity_Expansion
 '''))
