@@ -52,6 +52,10 @@ def get_document_metadata_filename(document_collection_name):
     return f'{CORPUS_DIR}/{document_collection_name}/{DOCUMENT_METADATA_FILENAME}'
 
 
+def get_document_raw_filename(document_collection_name, local_document_filename):
+    return f'{CORPUS_DIR}/{document_collection_name}/{RAW_DIR}/{local_document_filename}'
+
+
 def get_document_xhtml_filename(document_collection_name, local_document_filename):
     return f'{CORPUS_DIR}/{document_collection_name}/{TEXT_DIR}/{local_document_filename}{TEXT_EXTENSION}'
 

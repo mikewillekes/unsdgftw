@@ -17,6 +17,7 @@ corpus/OKR/**
 
 corpus/UNICEF/**
 !corpus/UNICEF/metadata.jsonl
+!corpus/UNICEF/seed_urls.txt
 
 corpus/research
 corpus/topics.jsonl

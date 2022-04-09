@@ -47,3 +47,12 @@ def save_document_metadata(filename, metadata):
         lines.append(to_json(m) + '\n')
     # Save to Jsonl file
     open(filename, 'w').writelines(lines)
+
+
+def append_document_metadata(filename, metadata):
+    # Serialize to json string & append newline
+    lines = []
+    for m in metadata:
+        lines.append(to_json(m) + '\n')
+    # Save to Jsonl file
+    open(filename, 'a').writelines(lines)
