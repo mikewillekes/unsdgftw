@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 from serde import serialize, deserialize
 from serde.json import from_json, to_json
 from dataclasses import dataclass
@@ -17,7 +17,7 @@ class DocumentMetadata:
     download_url: str
     title: str
     summary: str
-    year: date
+    year: datetime
 
 
 def generate_document_id(download_url):
