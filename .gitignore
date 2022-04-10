@@ -8,14 +8,14 @@ corpus/IPCC/**
 
 corpus/IUCN/**
 !corpus/IUCN/metadata.jsonl
-!corpus/UNICEF/seed_urls.txt
+!corpus/IUCN/seed_urls.txt
 
 corpus/MA/**
 !corpus/MA/metadata.jsonl
 
 corpus/OKR/**
 !corpus/OKR/metadata.jsonl
-!corpus/UNICEF/seed_urls.txt
+!corpus/OKR/seed_urls.txt
 
 corpus/UNICEF/**
 !corpus/UNICEF/metadata.jsonl
