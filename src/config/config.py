@@ -37,7 +37,7 @@ NLP_MIN_SENTENCE_LENGTH = 30
 
 # Max number of pages to process per document (helpful to speed things
 # up during developement). There are some 3000+ page docs in the corpus!
-MAX_PAGES_PER_DOCUMENT = 1000
+MAX_PAGES_PER_DOCUMENT = 3000
 
 
 # =========================
