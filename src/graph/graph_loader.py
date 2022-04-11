@@ -53,13 +53,13 @@ def load_file(document_collection_name, filename, tg_job_name):
 
 def build_comention_edges():
     print('Building co-mention edges...')
-    res = conn.runInstalledQuery('Build_Comention_Edges')
+    res = conn.runInstalledQuery('Build_Comention_Edges', timeout=1800000)
     print(json.dumps(res, indent=2))
 
 
 def run_community_detection():
     print('Community detection...')
-    res = conn.runInstalledQuery('tg_label_prop', params='v_type=Entity&v_type=Topic&v_type=SDG&e_type=co_mention&wt_attr=weight&max_iter=30&output_limit=100&print_accum=true&attr=lid')
+    res = conn.runInstalledQuery('tg_label_prop', params='v_type=Entity&v_type=Topic&v_type=SDG&e_type=co_mention&wt_attr=weight&max_iter=30&output_limit=100&print_accum=true&attr=lid', timeout=1800000)
     print(json.dumps(res, indent=2))
 
 
@@ -72,7 +72,7 @@ def run_centrality():
     #   timeout: Maximum duration for successful query execution (in ms). Default: 16s.
     #   https://pytigergraph.github.io/pyTigerGraph/QueryFunctions/
     #
-    res = conn.runInstalledQuery('tg_closeness_cent', params='v_type=Entity&v_type=Topic&v_type=SDG&e_type=co_mention&re_type=co_mention&max_hops=10&top_k=100&wf=true&print_accum=true&result_attr=cent&display_edges=false', timeout=600000)
+    res = conn.runInstalledQuery('tg_closeness_cent', params='v_type=Entity&v_type=Topic&v_type=SDG&e_type=co_mention&re_type=co_mention&max_hops=10&top_k=100&wf=true&print_accum=true&result_attr=cent&display_edges=false', timeout=1800000)
     print(json.dumps(res, indent=2))
 
 if __name__ == "__main__":
