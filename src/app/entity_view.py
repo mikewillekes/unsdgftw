@@ -140,6 +140,6 @@ def write_entities(page_entity, results):
 
     entities = []
     for entity in results[3]['Entities']:
-        entities.append(f"- [{entity['attributes']['text']} ({entity['attributes']['@visitCount']} mentions)](./entity={entity['attributes']['id']})")
+        entities.append(f"- [{entity['attributes']['text']} ({entity['attributes']['@visitCount']} mentions)](./?entity={entity['attributes']['id']})")
         
     st.markdown('\n'.join(sorted(entities)))
