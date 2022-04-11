@@ -69,9 +69,18 @@ def write_sdgs(page_sdg, all_sdgs, results):
             paragraphs = sorted(result['attributes']['@relatedParagraphs'], key = lambda x: x['similarity'], reverse = True)
             st.markdown(f'###### {s.goal_num} - {s.goal}')    
 
-            with st.expander(f'SDG {page_sdg.goal_num} and {s.goal_num} are linked via {len(paragraphs)} paragraphs. Read more...'):
+            # Because of how graph walking works there may be duplicate paragraphs
+            num_unique_paragraphs = len(set([p['text'] for p in paragraphs]))
+
+            with st.expander(f'SDG {page_sdg.goal_num} and {s.goal_num} are linked via {num_unique_paragraphs} paragraphs. Read more...'):
+                
                 st.markdown(f'[Click here to explore SDG {s.goal_num}](./?sdg={s.goal_num})')
-                for paragraph in paragraphs[:5]:
+                
+                rendered_paragraphs = set()
+                for paragraph in paragraphs[:10]:
+
+                    if paragraph['text'] in rendered_paragraphs:
+                        continue
 
                     ids = paragraph['paragraph_id'].split('.')
                     document_id = ids[0]
@@ -82,6 +91,8 @@ def write_sdgs(page_sdg, all_sdgs, results):
                     else:
                         st.markdown(f'''
                             - {paragraph["text"]} [Document {document_id} (Page {page_number})](./?doc={document_id})''')
+
+                    rendered_paragraphs.add(paragraph['text'])
 
 
 def write_topics(page_sdg, results):
@@ -99,9 +110,16 @@ def write_topics(page_sdg, results):
         paragraphs = sorted(result['attributes']['@relatedParagraphs'], key = lambda x: x['similarity'], reverse = True)
         st.markdown(f'###### {", ".join(result["attributes"]["terms"])}')    
 
-        with st.expander(f'SDG {page_sdg.goal_num} is linked to this topic via {len(paragraphs)} paragraphs. Read more...'):
+        # Because of how graph walking works there may be duplicate paragraphs
+        num_unique_paragraphs = len(set([p['text'] for p in paragraphs]))
 
-            for paragraph in paragraphs[:5]:
+        with st.expander(f'SDG {page_sdg.goal_num} is linked to this topic via {num_unique_paragraphs} paragraphs. Read more...'):
+
+            rendered_paragraphs = set()
+            for paragraph in paragraphs[:10]:
+
+                if paragraph['text'] in rendered_paragraphs:
+                    continue
 
                 ids = paragraph['paragraph_id'].split('.')
                 document_id = ids[0]
@@ -111,7 +129,9 @@ def write_topics(page_sdg, results):
                         - {paragraph["text"]} [{documents[document_id]["title"]} ({documents[document_id]["organization"]}, Page {page_number})](./?doc={document_id})''')
                 else:
                     st.markdown(f'''
-                        - {paragraph["text"]} [Document {document_id} (Page {page_number})](./?doc={document_id})''')                 
+                        - {paragraph["text"]} [Document {document_id} (Page {page_number})](./?doc={document_id})''')     
+
+                rendered_paragraphs.add(paragraph['text'])            
 
 
 def write_documents(page_sdg, results):
