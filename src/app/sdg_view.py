@@ -5,7 +5,7 @@ import pyTigerGraph as tg
 from config import config
 from sdgs.sustainable_development_goals import *
 
-def show_sdg_view(conn, sdg_id, max_results):
+def show_sdg_view(conn, sdg_id, max_results, images):
 
     sdgs = preload_sdgs()
 
@@ -13,8 +13,8 @@ def show_sdg_view(conn, sdg_id, max_results):
     results = preload_query(conn, sdg_id, max_results)
     page_sdg = get_current_sdg(sdgs, results)
 
-    write_titles(page_sdg)
-    write_sdgs(page_sdg, sdgs, results)
+    write_titles(page_sdg, images)
+    write_sdgs(page_sdg, sdgs, results, images)
     write_topics(page_sdg, results)
     write_documents(page_sdg, results)
     write_entities(page_sdg, results)
@@ -36,12 +36,17 @@ def get_current_sdg(sdgs, results):
     return sdgs[results[0]['Start'][0]['v_id']]
 
 
-def write_titles(sdg):
+def write_titles(sdg, images):
+
     # Write summary results into Sidebar
-    st.sidebar.title(sdg.goal_num)
     st.sidebar.header(sdg.goal_category_short)
-    st.sidebar.markdown(sdg.goal_category_long)
-    st.sidebar.markdown(sdg.goal)
+    
+    if sdg.goal_category_num in images:
+        image = images[sdg.goal_category_num]
+        st.sidebar.image(image)
+    
+    st.sidebar.header(sdg.goal_category_long)
+    st.sidebar.markdown(f'**{sdg.goal_num}** {sdg.goal}')
 
     st.sidebar.markdown('''
         - [Related SDGs](#related-sdgs)
@@ -51,7 +56,7 @@ def write_titles(sdg):
     ''')
 
 
-def write_sdgs(page_sdg, all_sdgs, results):
+def write_sdgs(page_sdg, all_sdgs, results, images):
     #
     # Write Related SDGs
     #
@@ -67,7 +72,13 @@ def write_sdgs(page_sdg, all_sdgs, results):
             
             s = all_sdgs[result["v_id"]]
             paragraphs = sorted(result['attributes']['@relatedParagraphs'], key = lambda x: x['similarity'], reverse = True)
-            st.markdown(f'###### {s.goal_num} - {s.goal}')    
+            
+            with st.container():            
+                if s.goal_category_num in images:
+                    image = images[s.goal_category_num]
+                    st.image(image, width=50)
+
+                st.markdown(f'###### {s.goal_num} - {s.goal}')    
 
             # Because of how graph walking works there may be duplicate paragraphs
             num_unique_paragraphs = len(set([p['text'] for p in paragraphs]))

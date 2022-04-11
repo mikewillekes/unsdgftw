@@ -1,5 +1,7 @@
 # standard imports
+from linecache import cache
 import os 
+from PIL import Image
 
 # library imports
 from dotenv import load_dotenv
@@ -12,6 +14,29 @@ from app.default_view import show_default_view
 from app.document_view import show_document_view
 from app.sdg_view import show_sdg_view
 from app.entity_view import show_entity_view
+
+@st.cache
+def load_sdg_images():
+    images = {}
+    images['1'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-01.png')
+    images['2'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-02.png')
+    images['3'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-03.png')
+    images['4'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-04.png')
+    images['5'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-05.png')
+    images['6'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-06.png')
+    images['7'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-07.png')
+    images['8'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-08.png')
+    images['9'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-09.png')
+    images['10'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-10.png')
+    images['11'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-11.png')
+    images['12'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-12.png')
+    images['13'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-13.png')
+    images['14'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-14.png')
+    images['15'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-15.png')
+    images['16'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-16.png')
+    images['17'] = Image.open(f'{config.SDG_IMAGES_FOLDER}/E-WEB-Goal-17.png')
+    return images
+
 
 load_dotenv()
 
@@ -34,8 +59,8 @@ st.set_page_config(
     layout='wide',
     initial_sidebar_state='auto')
 
-def show_entity_page(entity_id):
-    st.title(f'Entity {entity_id}')
+
+
 #
 # For this hackathon project the Streamlit app will render a 
 # small number of views based on the incoming query parameters.
@@ -48,6 +73,8 @@ def show_entity_page(entity_id):
 #   Default View:   0 or >1 Params (i.e. if URL has both ?doc=XXXX&sdg=Y.Z show the default)
 query_parameters = st.experimental_get_query_params()
 
+images = load_sdg_images()
+
 if len(query_parameters) == 0 or len(query_parameters) > 1:
     show_default_view(conn)
 
@@ -55,7 +82,10 @@ elif 'doc' in query_parameters:
     show_document_view(conn, query_parameters['doc'][0])
 
 elif 'sdg' in query_parameters:
-    show_sdg_view(conn, query_parameters['sdg'][0], 25)
+    show_sdg_view(conn, query_parameters['sdg'][0], 25, images)
 
 elif 'entity' in query_parameters:
-    show_entity_view(conn, query_parameters['entity'][0], 25)
+    show_entity_view(conn, query_parameters['entity'][0], 25, images)
+
+
+

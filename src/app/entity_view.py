@@ -5,7 +5,7 @@ import pyTigerGraph as tg
 from config import config
 from sdgs.sustainable_development_goals import *
 
-def show_entity_view(conn, entity_id, max_results):
+def show_entity_view(conn, entity_id, max_results, images):
 
     sdgs = preload_sdgs()
 
@@ -14,7 +14,7 @@ def show_entity_view(conn, entity_id, max_results):
     page_entity = get_current_entity(results)
     write_titles(page_entity)
 
-    write_sdgs(page_entity, sdgs, results)
+    write_sdgs(page_entity, sdgs, results, images)
     write_topics(page_entity, results)
     write_documents(page_entity, results)
     write_entities(page_entity, results)
@@ -47,7 +47,7 @@ def write_titles(page_entity):
     ''')
 
 
-def write_sdgs(page_entity, all_sdgs, results):
+def write_sdgs(page_entity, all_sdgs, results, images):
     #
     # Write Related SDGs
     #
@@ -62,7 +62,13 @@ def write_sdgs(page_entity, all_sdgs, results):
 
         s = all_sdgs[result["v_id"]]
         paragraphs = result['attributes']['@relatedParagraphs']
-        st.markdown(f'###### {s.goal_num} - {s.goal}')    
+
+        with st.container():            
+            if s.goal_category_num in images:
+                image = images[s.goal_category_num]
+                st.image(image, width=50)
+
+            st.markdown(f'###### {s.goal_num} - {s.goal}')    
 
         with st.expander(f'{page_entity["text"]} and SDG {s.goal_num} are linked via {len(paragraphs)} paragraphs. Read more...'):
             st.markdown(f'[Click here to explore SDG {s.goal_num}](./?sdg={s.goal_num})')

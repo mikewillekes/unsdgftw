@@ -16,6 +16,7 @@ DOCUMENT_METADATA_FILENAME = 'metadata.jsonl'
 TOPIC_METADATA_FILENAME = 'topics.jsonl'
 SDGS_FILENAME = f'{CORPUS_DIR}/resources/Sustainable Development Goals Feb 2022.csv'
 MATCH_PHRASES_FILENAME = f'{CORPUS_DIR}/resources/MatchPhrases.txt'
+SDG_IMAGES_FOLDER = f'{CORPUS_DIR}/resources/SDG Icons 2019_WEB'
 
 # =========================
 # File extensions
