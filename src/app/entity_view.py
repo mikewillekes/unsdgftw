@@ -66,7 +66,7 @@ def write_sdgs(page_entity, all_sdgs, results):
 
         with st.expander(f'{page_entity["text"]} and SDG {s.goal_num} are linked via {len(paragraphs)} paragraphs. Read more...'):
             st.markdown(f'[Click here to explore SDG {s.goal_num}](./?sdg={s.goal_num})')
-            for paragraph in paragraphs[:5]:
+            for paragraph in paragraphs[:25]:
 
                 ids = paragraph['paragraph_id'].split('.')
                 document_id = ids[0]
@@ -96,7 +96,7 @@ def write_topics(page_entity, results):
 
         with st.expander(f'{page_entity["text"]} is linked to this topic via {len(paragraphs)} paragraphs. Read more...'):
 
-            for paragraph in paragraphs[:5]:
+            for paragraph in paragraphs[:25]:
 
                 ids = paragraph['paragraph_id'].split('.')
                 document_id = ids[0]

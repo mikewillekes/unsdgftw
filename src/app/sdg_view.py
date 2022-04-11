@@ -77,7 +77,7 @@ def write_sdgs(page_sdg, all_sdgs, results):
                 st.markdown(f'[Click here to explore SDG {s.goal_num}](./?sdg={s.goal_num})')
                 
                 rendered_paragraphs = set()
-                for paragraph in paragraphs[:10]:
+                for paragraph in paragraphs[:25]:
 
                     if paragraph['text'] in rendered_paragraphs:
                         continue
@@ -116,7 +116,7 @@ def write_topics(page_sdg, results):
         with st.expander(f'SDG {page_sdg.goal_num} is linked to this topic via {num_unique_paragraphs} paragraphs. Read more...'):
 
             rendered_paragraphs = set()
-            for paragraph in paragraphs[:10]:
+            for paragraph in paragraphs[:25]:
 
                 if paragraph['text'] in rendered_paragraphs:
                     continue
