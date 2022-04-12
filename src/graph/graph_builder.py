@@ -10,13 +10,27 @@ from config import config
 from graph import graph_config
 from sdgs.sustainable_development_goals import *
 
+ENTITY_TYPES = ['EVENT', 'GPE', 'LOC', 'ORG']
+
+
+def load_topic_mapping():
+    with open(f'{config.CORPUS_DIR}/resources/topic_mapping.csv', 'r') as fin:
+        reader = csv.reader(fin, delimiter=',', quotechar='"',  quoting=csv.QUOTE_MINIMAL)
+        topics = set()
+        for row in reader:
+            if row[0] == '1':
+                topics.add(row[3])
+
+        return topics
+
 
 def main():
     stage_graph_data('UNICEF')
 
 
 def stage_graph_data(document_collection_name):
-    stage_nodes(document_collection_name)
+    print(f'Staging graph data for {document_collection_name}')
+    stage_nodes(document_collection_name, load_topic_mapping())
     stage_edges(document_collection_name)
 
 
@@ -31,7 +45,7 @@ def build_writer(f, header_row):
     return writer
 
 
-def stage_nodes(document_collection_name):
+def stage_nodes(document_collection_name, topics_to_keep):
 
     with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.CORPUS_NODES}', mode='w') as f:
         writer = build_writer(f, ['id', 'organization', 'sourceURL', 'summary'])
@@ -82,9 +96,10 @@ def stage_nodes(document_collection_name):
             paragraphs = load_paragraph_metadata(paragraph_metadata_filename)
             for paragraph in paragraphs:
                 for entity in paragraph.entities:
-                    # the 0 at the end is a placeholder for the lid ("label-id") that will
-                    # be calculated later via label propagation community detection algorithm
-                    writer.writerow([entity.id, entity.text, entity.label, 0, 0.0])
+                    if entity.label in ENTITY_TYPES:
+                        # the 0 at the end is a placeholder for the lid ("label-id") that will
+                        # be calculated later via label propagation community detection algorithm
+                        writer.writerow([entity.id, entity.text, entity.label, 0, 0.0])
 
 
     with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.SDG_NODES}', mode='w') as f:
@@ -102,11 +117,12 @@ def stage_nodes(document_collection_name):
     with open(f'{config.get_graph_staging_dir(document_collection_name)}/{graph_config.TOPIC_NODES}', mode='w') as f:
         writer = build_writer(f, ['paragraph', 'id', 'probability', 'topic', 'term1', 'term2', 'term3', 'term4', 'term5', 'term6', 'term7', 'term8', 'term9', 'term10'])
         for topic in load_topic_metadata(config.get_topic_metadata_filename(document_collection_name)):
-            # the 0 at the end is a placeholder for the lid ("label-id") that will
-            # be calculated later via label propagation community detection algorithm
-            row = list([topic.paragraph_id, topic.id, topic.topic_probability, topic.topic_number, 0, 0.0])
-            row.extend([t for t in topic.terms])
-            writer.writerow(row)
+            if topic.id in topics_to_keep:
+                # the 0 at the end is a placeholder for the lid ("label-id") that will
+                # be calculated later via label propagation community detection algorithm
+                row = list([topic.paragraph_id, topic.id, topic.topic_probability, topic.topic_number, 0, 0.0])
+                row.extend([t for t in topic.terms])
+                writer.writerow(row)
 
 
 
@@ -154,7 +170,8 @@ def stage_edges(document_collection_name):
             paragraph_metadata_filename = config.get_paragraph_metadata_filename(document_collection_name, document.local_filename)
             for paragraph in load_paragraph_metadata(paragraph_metadata_filename):
                 for entity in paragraph.entities:
-                    writer.writerow([entity.mention_id, entity.id])
+                    if entity.label in ENTITY_TYPES:
+                        writer.writerow([entity.mention_id, entity.id])
 
 if __name__ == "__main__":
     main()
