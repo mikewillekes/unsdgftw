@@ -6,9 +6,8 @@ corpus/IPBES/2-text/*.xml
 corpus/IPCC/1-raw/*.pdf
 corpus/IPCC/2-text/*.xml
 
-corpus/IUCN/**
-!corpus/IUCN/metadata.jsonl
-!corpus/IUCN/seed_urls.txt
+corpus/IUCN/1-raw/*.pdf
+corpus/IUCN/2-text/*.xml
 
 corpus/MA/**
 !corpus/MA/metadata.jsonl
