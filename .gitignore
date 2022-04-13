@@ -12,9 +12,8 @@ corpus/IUCN/2-text/*.xml
 corpus/MA/1-raw/*.pdf
 corpus/MA/2-text/*.xml
 
-corpus/OKR/**
-!corpus/OKR/metadata.jsonl
-!corpus/OKR/seed_urls.txt
+corpus/OKR/1-raw/*.pdf
+corpus/OKR/2-text/*.xml
 
 corpus/UNICEF/**
 !corpus/UNICEF/metadata.jsonl
