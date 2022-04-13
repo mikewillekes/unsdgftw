@@ -9,8 +9,8 @@ corpus/IPCC/2-text/*.xml
 corpus/IUCN/1-raw/*.pdf
 corpus/IUCN/2-text/*.xml
 
-corpus/MA/**
-!corpus/MA/metadata.jsonl
+corpus/MA/1-raw/*.pdf
+corpus/MA/2-text/*.xml
 
 corpus/OKR/**
 !corpus/OKR/metadata.jsonl
