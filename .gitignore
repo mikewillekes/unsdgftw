@@ -3,8 +3,8 @@
 corpus/IPBES/1-raw/*.pdf
 corpus/IPBES/2-text/*.xml
 
-corpus/IPCC/**
-!corpus/IPCC/metadata.jsonl
+corpus/IPCC/1-raw/*.pdf
+corpus/IPCC/2-text/*.xml
 
 corpus/IUCN/**
 !corpus/IUCN/metadata.jsonl
