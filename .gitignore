@@ -1,7 +1,7 @@
 # Text Corpus. Keep root metadata files,
 # but ignore all binary and NLP cleaning
-corpus/IPBES/**
-!corpus/IPBES/metadata.jsonl
+corpus/IPBES/1-raw/*.pdf
+corpus/IPBES/2-text/*.xml
 
 corpus/IPCC/**
 !corpus/IPCC/metadata.jsonl
