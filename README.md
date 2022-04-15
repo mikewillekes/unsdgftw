@@ -6,12 +6,12 @@ Use this template for your project submisison and edit the README following the 
 
 **Problem Statement addressed (or explain your own): [ ]**
 
-![UN Sustainable Development Goals]('images/sdg-intro.png')
+![UN Sustainable Development Goals](images/sdg-intro.png)
 
 
 **Description**: 
 
-![sdfds]('images/linked-sdg-highlight.gif')
+![sdfds](images/linked-sdg-highlight.gif)
 
 Explain what your project is trying to accomplish and how you utilized graph technology to achieve those goals. 
 Describe how your submission is relevant to the problem statement and why it is impactful to the world. Remember to link your submission video here. 
