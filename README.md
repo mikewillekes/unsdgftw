@@ -80,15 +80,27 @@ This can include:
 3. Access data
 4. Steps to build/run project
 
-## Known Issues and Future Improvements
-
-Explain known liminations within the project and potential next steps. 
 
 ## Reflections
 
-Review the steps you took to create this project and the resources you were provided. Feel free to indiciate room for improvement and general reflections.
+### What Went Well
 
-## References
+- From early-on, a priority was placed on scripts to automate the end-to-end flow: regenerating datasets from raw PDFs, to dropping-and-recreating the TigerGraph schema and installing queries, loading data and enriching the graphs with augmented edges, centrality and community detection; This enabled fast, frequent iteration as all of the moving parts started coming together
+- The graph schema worked very well from inception to delivery
+![Graph Schema](images/schema.png)
+- The TigerGraph and GSQL tools were easy get started, well documented and performed extremely well; however it did take a while to adjust to thinking in terms of GSQL and Accumulators vs. relational SQL
+
+### Known Issues and Future Improvements
+
+- It was out of scope to build a semantic _search_ interface, only exploration; a future improvement would be to include a semantic search solution via vector similarity.
+- Semantic similarity (cosine distance) was calculated between each sentence and each SDG sub-goal using a pre-trained transformer model. This simple unsupervised ML approach often had diffiulties distinguishing between multiple but similar SGS. Likely a supervised multi-class classifier approach could achieve better results.
+- Research documents themselves contains numerous references to other publications. These were *not* taken into account when building the Knowledge Graph. 
+- Topics, extracted as a collection of words, are _weird_ for displaying to non-NLP enthusiasts. We understand what _"fgm|girls|practice|women|undergone|aged|who|prevalence|years|15"_ is about, but it's not a user-friendly way to display data.
+- SDGs, Entities and Topics were considered 'related' if they co-occurred in the same Paragraph. This is a naive rule that doesn't always hold true (i.e. for very long paragraphs).
+- More Data! About 200 PDFs (~21K Paragraphs of text) were crawled across 5 organizations. The focus of this project was on the NLP, graph algorithms and UI development instead. However with a bit more work, this approach could easily scale to 1000s of documents. 
+- The TigerGraph CSV API is clunky to use as schema changes. Late in the project, a few new fields were added to nodes and edges to explore capabilties of the TigerGraph data science library; but this broke all the existing loading scripts as positional CSV column designations match anymore.
+- It could be compelling to explore a proof-of-concept using this Knowledge Graph to generate graph embedding that could be shared to enrich other downstream machine learning tasks. 
+
 
 ### Open Source Tools
 - [Hugging Face: Transformers](https://huggingface.co/docs/transformers/index)
