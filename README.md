@@ -30,11 +30,22 @@ The concept of applying Natural Language Processing techniques to extract and co
 - The availability of powerful, pre-trained NLP Language Models
 - SaaS graph database platforms, like [TigerGraph](https://www.tigergraph.com/), with great community support and a low barrier to entry
 
-The goal of this project was to build a solution that empowered non-technical (about programming, web-crawling, machine learning or graph databases) users to easily discover links between Documents, SDGs, Entities (people, places and organizations) and Topics, while always retaining the link back to a source document.
+![NLP to Graph](images/nlp-to-graph.gif)
+
+The goal of this project was to build a solution that empowered non-technical (about programming, web-crawling, machine learning or graph databases) users to easily discover links between Documents, SDGs, Entities (people, places and organizations) and Topics, while always retaining the link back to a source document or paragraph.
+
+
+### A Single Document
+![Graph representation of one document](images/single-document.gif)
+
+### Multiple Documents
+![Graph representation of multiple documents](images/multiple-documents.png)
 
 This final aspect significanly increased the technical complexity of the solution. Many described and published approaches focus only on extracting and building a Knowledge Graph, presenting their results as a [traditional node-linked diagram](https://www.google.com/search?q=nlp+build+knowledge+graph&tbm=isch&chips=q:nlp+build+knowledge+graph,online_chips:named+entity+recognition), which great for conveying the results to other graph professionals, but difficult to navigate for non-technical users. A user-frendly Web Application front-end would need to be built backed by TigerGraph as the data engine.
 
 
+Use the **Semantic Graph Explorer for Sustinable Development** to find links between SDG 15.7 _"Take urgent action to end poaching and trafficking of protected species of flora and fauna and address both demand and supply of illegal wildlife products"_ and the topic "Women, rights and Gender-Based Violence" which are linked in the document [Gender-based violance and environment linkages (IUCN 2020)](https://portals.iucn.org/library/node/48969)
+![SDG 15.7 and GBV](images/ui-sdg-to-topic.gif)
 
 
 
@@ -79,4 +90,16 @@ Review the steps you took to create this project and the resources you were prov
 
 ## References
 
-Please give credit to other projects, videos, talks, people, and other sources that have inspired and influenced your project. 
+### Open Source Tools
+- [Hugging Face: Transformers](https://huggingface.co/docs/transformers/index)
+- [spaCy](https://spacy.io/)
+- [BERTopic: Topic modelling with Transformers](https://maartengr.github.io/BERTopic/index.html)
+- [Apache Tika: PDF Text Extraction](https://tika.apache.org/)
+- [Beautiful Soup: HTML processing](https://beautiful-soup-4.readthedocs.io/en/latest/)
+
+### Blog Posts and Videos
+- [Use PyTorch and TensorFlow with an NVIDIA GPU in the Windows Linux Subsystem (WSL)
+](https://youtu.be/mWd9Ww9gpEM)
+- [Organizing your scholarly PDFs to easily find keywords using pdfminer.six](https://medium.com/@boilertoad_30976/organizing-your-scholarly-pdfs-to-easily-find-keywords-using-pdfminer-six-b50409b5015f)
+- [Semantic Search with Sentence Transformers](https://github.com/UKPLab/sentence-transformers/tree/master/examples/applications/semantic-search)
+- [Fast Clustering with Sentence Transformers](https://github.com/UKPLab/sentence-transformers/blob/master/examples/applications/clustering/fast_clustering.py)
