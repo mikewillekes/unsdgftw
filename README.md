@@ -42,7 +42,7 @@ The goal of this project was to build a solution that empowered non-technical (a
 ### Multiple Documents
 ![Graph representation of multiple documents](images/multiple-documents.png)
 
-This final aspect significanly increased the technical complexity of the solution. Many described and published approaches focus only on extracting and building a Knowledge Graph, presenting their results as a [traditional node-linked diagram](https://www.google.com/search?q=nlp+build+knowledge+graph&tbm=isch&chips=q:nlp+build+knowledge+graph,online_chips:named+entity+recognition), which great for conveying the results to other graph professionals, but difficult to navigate for non-technical users. A user-frendly Web Application front-end would need to be built backed by TigerGraph as the data engine.
+This final aspect significanly increased the technical complexity of the solution. Many described and published approaches focus only on extracting and building a Knowledge Graph, stopping at presenting their results as a [traditional node-linked diagram](https://www.google.com/search?q=nlp+build+knowledge+graph&tbm=isch&chips=q:nlp+build+knowledge+graph,online_chips:named+entity+recognition) (such as the screenshot above), which is great for conveying the results to other graph professionals, but difficult to navigate for non-technical users. A user-frendly Web Application front-end would need to be built backed by TigerGraph as the data engine.
 
 ### Explore SDGs
 Use the **Semantic Graph Explorer for Sustinable Development** to find links between SDG 15.7 _"Take urgent action to end poaching and trafficking of protected species of flora and fauna and address both demand and supply of illegal wildlife products"_ and the topic "Women, rights and Gender-Based Violence" which are linked in the document [Gender-based violance and environment linkages (IUCN 2020)](https://portals.iucn.org/library/node/48969)
@@ -210,7 +210,7 @@ All of the developement of this Hackathon solution was done in Visual Studio Cod
 ```
 ~/projects/unsdgftw> export PYTHONPATH=./src
 
-~/projects/unsdgftw>~/projects/unsdgftw> python src/graph/tg_create_schema.py
+~/projects/unsdgftw> python src/graph/tg_create_schema.py
 ```
 
 Copy the `token` from the last line of the console output into the `.env` file. _Note: this token is scrubbed and recreated when the new schema is created, so don't copy the one in the attached screenshot._
@@ -222,32 +222,39 @@ Copy the `token` from the last line of the console output into the `.env` file. 
 ```
 ~/projects/unsdgftw> export PYTHONPATH=./src
 
-~/projects/unsdgftw>~/projects/unsdgftw> python src/graph/tg_install_queries.py
+~/projects/unsdgftw> python src/graph/tg_install_queries.py
 ```
 
 ![Install Queries](images/installation-install-queries.png)
 
+## G. Build and Load the Graph Data
 
+```
+~/projects/unsdgftw> export PYTHONPATH=./src
 
- - **Data**: Give context for the dataset used and give full access to judges if publicly available or metadata otherwise. 
- - **Technology Stack**: Describe technologies and programming languages used. 
- - **Visuals**: Feel free to include other images or videos to better demonstrate your work.
- - Link websites or applications if needed to demonstrate your work. 
+~/projects/unsdgftw> python src/run_pipeline_step_3_graph.py
+```
 
-## Dependencies
+Once loaded (and `build_comention_edges()` is complete) you should end up with approximately **600,000 Vertices** and **1,100,000 Edges**
 
-State any dependencies and their versions needed to be installed to test this project. This may include programming languages, frameworks, libraries, and etc. 
+![Loading Page](images/installation-loading.png)
 
-## Installation
+## F. Launch Streamlit Web Application
 
-Please give detailed instructions on installing, configuring, and running the project so judges can fully replicate and assess it. 
+```
+~/projects/unsdgftw> export PYTHONPATH=./src
 
-This can include:
-1. Clone repository
-2. Install dependencies
-3. Access data
-4. Steps to build/run project
+~/projects/unsdgftw> streamlit run src/streamlit_app.py
+ 
+ You can not view your Streamlit app in your browser.
 
+ Network URL: http://X.X.X.X:8501
+ External URL: http://Y.Y.Y.Y:8501
+```
+
+Click (or copy-and-paste) the Network URL to open in your browser.
+
+![Homepage](images/installation-streamlit.png)
 
 ## Reflections
 
