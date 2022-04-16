@@ -43,10 +43,17 @@ The goal of this project was to build a solution that empowered non-technical (a
 
 This final aspect significanly increased the technical complexity of the solution. Many described and published approaches focus only on extracting and building a Knowledge Graph, presenting their results as a [traditional node-linked diagram](https://www.google.com/search?q=nlp+build+knowledge+graph&tbm=isch&chips=q:nlp+build+knowledge+graph,online_chips:named+entity+recognition), which great for conveying the results to other graph professionals, but difficult to navigate for non-technical users. A user-frendly Web Application front-end would need to be built backed by TigerGraph as the data engine.
 
-
+### Explore SDGs
 Use the **Semantic Graph Explorer for Sustinable Development** to find links between SDG 15.7 _"Take urgent action to end poaching and trafficking of protected species of flora and fauna and address both demand and supply of illegal wildlife products"_ and the topic "Women, rights and Gender-Based Violence" which are linked in the document [Gender-based violance and environment linkages (IUCN 2020)](https://portals.iucn.org/library/node/48969)
 ![SDG 15.7 and GBV](images/ui-sdg-to-topic.gif)
 
+### Explore Entities
+Use the **Semantic Graph Explorer for Sustinable Development** to find SDGs, Topic, Documents and Entities related to Bangladesh.
+![Bangaledh](images/single_entity_explore.gif)
+
+### Explore a Document
+Using a [Ploty](plotly.com) and the data in TigerGraph, it's possible to explore the SDG, Entity and Topic relationships with a document in a visual format. This capability was developed very late, and though it makes for an interesting visual - the analytic usefulness is limited in the current form.
+![Document Histogram](images/document-histogram.gif)
 
 
 Explain what your project is trying to accomplish and how you utilized graph technology to achieve those goals. 
@@ -60,6 +67,47 @@ Tell us how your entry was the most...
 - Applicable graph solution 
 
 Other additions: 
+
+# Technical Details
+
+Everything necessary to reproduce this solution is available in the Github repo: [mikewillekes/unsdgftw](https://github.com/mikewillekes/unsdgftw)
+
+The end-to-end pipeline is as follows:
+
+- Install Python prerequisites via `pipenv`
+- Raw Data Acquisition and Preprocessing
+    - This is the only manual step as some of the source PDFs were manually download and converted to XHTML using Apache Tika
+    - These PDFs can quite large so are *not* included in the Git repo, however the outputs of **Clean Text** *are* included in the repo so the entire graph solution can be recreated 
+- Clean Text
+    - Extract Paragraphs
+    - Extract Sentences
+    - Extract Entities
+- NLP
+    - Semantic Similarity
+    - Topic Modelling
+- Graph
+    - Create TigerGraph Schema from empty Solution
+    - Install GSQL Queries
+    - Build CSV files for loading
+    - Load CSV files to TigerGraph
+    - Augment Graph by building co_mention edges between SDGs, Entities and Topics
+    - Community detection via label propogation (result stored in `lid` atttribute)
+    - Closeness Centrality calculation (result stored in `cent` attribute)
+- Streamlit Application UI
+    - Launch Streamlit app to view UI
+
+
+## Install Python prerequisites via `pipenv`
+
+Pipenv is a packaging tool that consolidates `pip`, `virutalenv` and `requirements.txt`. For more details on this tool see [Pipenv: A Guide to the New Python Packaging Tool](https://realpython.com/pipenv-guide/)
+
+
+
+## Data
+
+The
+
+
 
  - **Data**: Give context for the dataset used and give full access to judges if publicly available or metadata otherwise. 
  - **Technology Stack**: Describe technologies and programming languages used. 
