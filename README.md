@@ -22,6 +22,7 @@ A researcher, development analyst or project coordinator looking for findings th
 - [The International Union for Conservation of Nature](https://portals.iucn.org/library/dir/publications-list)
 - [Intergovernmental Platform for Biodiversity and Ecosystem Services](https://ipbes.net/assessing-knowledge)
 - [IPCC The Intergovernmental Panel on Climate Change](https://www.ipcc.ch/report/sixth-assessment-report-cycle/)
+- [Millennium Ecosystem Assessment](https://www.millenniumassessment.org/en/index.html)
 
 ## Natural Language Processing and TigerGraph to the Rescue!
 
@@ -101,9 +102,46 @@ The end-to-end pipeline is as follows:
 
 Pipenv is a packaging tool that consolidates `pip`, `virutalenv` and `requirements.txt`. For more details on this tool see [Pipenv: A Guide to the New Python Packaging Tool](https://realpython.com/pipenv-guide/)
 
+```
+~/projects> git clone git@github.com:mikewillekes/unsdgftw.git
+
+~/projects> cd unsdgftw
+
+~/projects/unsdgftw> pipenv shell
+
+~/projects/unsdgftw> pipenv install
+```
+
+Note: the NLP preprocessing steps were run using Spacy, Hugging Face - Tansformers, Tensorflow and PyTorch. These dependencies were gathered into the Pipenv `dev` dependencies.
+
+These libraries are not necessry if you only want load and run the TigerGraph data. If you have an NVidia GPU with the Cuda 11.3 libraries installed and you do want to rerun the NLP steps use:
+
+```
+~/projects/unsdgftw> pipenv install --dev
+```
+
+## Raw Data Acquisition and Preprocessing
+
+The `corpus` directory contains all the staged and processed data for the NLP and Graph. There are 5 top-level directories corresponding to each of the datasources, each directory has a `metadata.jsonl` file describing all the metatada for each source document:
+
+- `corpus/IPBES/metadata.jsonl`
+    - 8 documents (PDF) from the [Intergovernmental Platform for Biodiversity and Ecosystem Services](https://ipbes.net/assessing-knowledge)
+- `corpus/IPCC/metadata.jsonl`
+    - 1 document (PDF) from the [Intergovernmental Panel on Climate Change](https://www.ipcc.ch/report/sixth-assessment-report-cycle/)
+- `corpus/IUCN/metadata.jsonl`
+    - 53 documents (PDF) from the [International Union for Conservation of Nature](https://portals.iucn.org/library/dir/publications-list)
+- `corpus/MA/metadata.jsonl`
+    - 4 documents (PDF) from the [Millennium Ecosystem Assessment](https://www.millenniumassessment.org/en/index.html)
+- `corpus/OKR/metadata.jsonl`
+    - 43 documents (PDF) from the [World Bank Open Data Repository](https://openknowledge.worldbank.org/)
+- `corpus/UNICEF/metadata.jsonl`
+    - 84 documents (PDF) from [UNICEF](https://data.unicef.org/resources/)
 
 
-## Data
+
+
+![Corpus Directory](images/corpus-dir.png)
+
 
 The
 
