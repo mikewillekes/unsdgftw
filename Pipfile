@@ -7,7 +7,6 @@ verify_ssl = true
 jupyter = "*"
 beautifulsoup4 = "*"
 spacy = {extras = ["cuda113", "transformers"], version = "*"}
-pyserde = "*"
 transformers = "*"
 tensorflow-gpu = "*"
 sentence-transformers = "*"
@@ -19,7 +18,8 @@ requests = "*"
 pytigergraph = "*"
 python-dotenv = "*"
 streamlit = "*"
-serde = "*"
+pyserde = "*"
+plotly = "*"
 
 [requires]
 python_version = "3.8"
