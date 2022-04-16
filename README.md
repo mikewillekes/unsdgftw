@@ -26,7 +26,7 @@ A researcher, development analyst or project coordinator looking for findings th
 
 ## Natural Language Processing and TigerGraph to the Rescue!
 
-The concept of applying Natural Language Processing techniques to extract and construct knowledge graphs from unstructured text is not new. I personally began working on projects in this techncial domain more than ten years ago. However, what once took years of R&D by a team of researchers and engineers, is now achieveable by a proficient solo-developer in a few weeks on commodity hardware. What *has* changed recently is:
+The concept of applying Natural Language Processing techniques to extract and construct knowledge graphs from unstructured text is not new. I personally began working on projects in this technical domain more than ten years ago. However, what once took years of R&D by a team of researchers and engineers, is now achievable by a proficient solo-developer in a few weeks on commodity hardware. What *has* changed recently is:
 
 - The availability of powerful, pre-trained NLP Language Models
 - SaaS graph database platforms, like [TigerGraph](https://www.tigergraph.com/), with great community support and a low barrier to entry
@@ -41,31 +41,19 @@ The goal of this project was to build a solution that empowered non-technical (a
 ### Multiple Documents
 ![Graph representation of multiple documents](images/multiple-documents.png)
 
-This final aspect significanly increased the technical complexity of the solution. Many described and published approaches focus only on extracting and building a Knowledge Graph, stopping at presenting their results as a [traditional node-linked diagram](https://www.google.com/search?q=nlp+build+knowledge+graph&tbm=isch&chips=q:nlp+build+knowledge+graph,online_chips:named+entity+recognition) (such as the screenshot above), which is great for conveying the results to other graph professionals, but difficult to navigate for non-technical users. A user-frendly Web Application front-end would need to be built backed by TigerGraph as the data engine.
+This final aspect significancy increased the technical complexity of the solution. Many described and published approaches focus only on extracting and building a Knowledge Graph, stopping at presenting their results as a [traditional node-linked diagram](https://www.google.com/search?q=nlp+build+knowledge+graph&tbm=isch&chips=q:nlp+build+knowledge+graph,online_chips:named+entity+recognition) (such as the screenshot above), which is great for conveying the results to other graph professionals, but difficult to navigate for non-technical users. A user-friendly Web Application front-end would need to be built backed by TigerGraph as the data engine.
 
 ### Explore SDGs
-Use the **Semantic Graph Explorer for Sustinable Development** to find links between SDG 15.7 _"Take urgent action to end poaching and trafficking of protected species of flora and fauna and address both demand and supply of illegal wildlife products"_ and the topic "Women, rights and Gender-Based Violence" which are linked in the document [Gender-based violance and environment linkages (IUCN 2020)](https://portals.iucn.org/library/node/48969)
+Use the **Semantic Graph Explorer for Sustainable Development** to find links between SDG 15.7 _"Take urgent action to end poaching and trafficking of protected species of flora and fauna and address both demand and supply of illegal wildlife products"_ and the topic "Women, rights and Gender-Based Violence" which are linked in the document [Gender-based violence and environment linkages (IUCN 2020)](https://portals.iucn.org/library/node/48969)
 ![SDG 15.7 and GBV](images/ui-sdg-to-topic.gif)
 
 ### Explore Entities
-Use the **Semantic Graph Explorer for Sustinable Development** to find SDGs, Topic, Documents and Entities related to Bangladesh.
-![Bangaledh](images/single_entity_explore.gif)
+Use the **Semantic Graph Explorer for Sustainable Development** to find SDGs, Topic, Documents and Entities related to Bangladesh.
+![Bangladesh](images/single_entity_explore.gif)
 
 ### Explore a Document
 Using a [Ploty](plotly.com) and the data in TigerGraph, it's possible to explore the SDG, Entity and Topic relationships with a document in a visual format. This capability was developed very late, and though it makes for an interesting visual - the analytic usefulness is limited in the current form.
 ![Document Histogram](images/document-histogram.gif)
-
-## Impactfulness
-How does your project positively impact people’s lives? In your response, address the following: How many people, families and organizations does your solution help? What’s the level of social and/or economic benefit to the world and how does your solution address the root issue(s)? When relevant, please provide data-backed (i.e. citation, research, reports, statistics, etc) arguments to support your claim.
-
-## Innovativeness
-How does your project offer a novel use of graph or approach to the problem? In your response, address the following: Did you frame a complicated problem in a new way? Did you come up with a creative way to overcome the challenges? When relevant, please provide data-backed (i.e. citation, research, reports, statistics, etc) arguments to support your claim.
-
-## Ambitiousness
-How does your project push the boundaries of, scale and scope of graph to solve real world problems? In your response, address the following: What is your graph schema size (entity types, relationship types, domains, etc? What’s the scale of your graph solution and the functional features you’ve added? When relevant, please provide data-backed (i.e. citation, research, reports, statistics, etc) arguments to support your claim.
-
-## Applicability
-How will your project be adopted and applied by other organizations or industries? In your response, address the following: How easy will it be to put your solution into real-world use? How many industries could adopt your solution? What is the size of this market or industry that could adopt your solution? When relevant, please provide data-backed (i.e. citation, research, reports, statistics, etc) arguments to support your claim. 
 
 # Technical Details
 
@@ -90,14 +78,14 @@ The end-to-end pipeline is as follows:
     - Build CSV files for loading
     - Load CSV files to TigerGraph
     - Augment Graph by building co_mention edges between SDGs, Entities and Topics
-    - Community detection via label propogation (result stored in `lid` atttribute)
+    - Community detection via label propagation (result stored in `lid` attribute)
     - Closeness Centrality calculation (result stored in `cent` attribute)
 - Streamlit Application UI
     - Launch Streamlit app to view UI
 
 ## Raw Data Acquisition and Preprocessing
 
-The `corpus` directory contains all the staged and processed data for the NLP and Graph. There are 5 top-level directories corresponding to each of the datasources, each directory has a `metadata.jsonl` file describing all the metatada for each source document:
+The `corpus` directory contains all the staged and processed data for the NLP and Graph. There are 5 top-level directories corresponding to each of the datasources, each directory has a `metadata.jsonl` file describing all the metadata for each source document:
 
 - `corpus/IPBES/metadata.jsonl`
     - 8 documents (PDF) from the [Intergovernmental Platform for Biodiversity and Ecosystem Services](https://ipbes.net/assessing-knowledge)
@@ -112,22 +100,22 @@ The `corpus` directory contains all the staged and processed data for the NLP an
 - `corpus/UNICEF/metadata.jsonl`
     - 84 documents (PDF) from [UNICEF](https://data.unicef.org/resources/)
 
-Within each `corpus/DATASOURCE` directory, are 5 staging directories representing each stage in the **Semantic Graph Explorer for Sustinable Development** pipeline.
+Within each `corpus/DATASOURCE` directory, are 5 staging directories representing each stage in the **Semantic Graph Explorer for Sustainable Development** pipeline.
 
 - `1-raw`
-    - Contains raw PDF files manually downloaded or scraped/crawed
+    - Contains raw PDF files manually downloaded or scraped/crawled
     - These files are excluded from Git due to large size (~1.6GB of PDFs)
     - Scraping code is in `src/crawl`
-        - **Not necessary for reproducting the TigerGraph solution**
+        - **Not necessary for reproducing the TigerGraph solution**
 - `2-text`
-    - Using [Apache Tika](https://tika.apache.org/) a directory of raw PDFs are extacted into XHTML in the `2-text` directory
+    - Using [Apache Tika](https://tika.apache.org/) a directory of raw PDFs are extracted into XHTML in the `2-text` directory
     - ``` java -jar ./bin/tika-app-2.3.0.jar ./corpus/IPBES/1-raw ./corpus/IPBES/2-text ```
     - These files are excluded from Git due to large size
-        - **Not necessary for reproducting the TigerGraph solution**
+        - **Not necessary for reproducing the TigerGraph solution**
 - `3-cleantext`
     - Contains the output of running `src/run_pipeline_step_1_clean_text.py`
     - This data *is* included in Git (This steps takes several hours to run on all the text documents)
-        - **This directory is necessary for reproducting the TigerGraph solution**
+        - **This directory is necessary for reproducing the TigerGraph solution**
     - This script:
         - Parses XHTML output from Tika
         - Cleans Text:
@@ -140,10 +128,10 @@ Within each `corpus/DATASOURCE` directory, are 5 staging directories representin
 - `4-nlp`
     - Contains the output of running `src/run_pipeline_step_2_nlp.py`
     - This data *is* included in Git (though fast to run, the library dependencies are difficult to setup)
-        - **This directory is necessary for reproducting the TigerGraph solution**
+        - **This directory is necessary for reproducing the TigerGraph solution**
     - This script builds:
         - SDG to Sentence Similarity via [Hugging Face Transformers](https://huggingface.co/docs/transformers/index)
-        - Topic modelling of Paragraphs via [BERTopci] 
+        - Topic modelling of Paragraphs via [BERTopic] 
 
 - `5-graph`
     - Contains the output of running `src/run_pipeline_step_3_graph.py`
@@ -151,14 +139,14 @@ Within each `corpus/DATASOURCE` directory, are 5 staging directories representin
         - Builds and stages the TigerGraph CSV files
         - Loads the CSV files to TigerGraph
         - Runs `build_comention_edges()` between SDGs, Entities and Topics
-        - Runs `run_community_detection()` (Label Propogation from the TigerGraph Data Science Library)
+        - Runs `run_community_detection()` (Label Propagation from the TigerGraph Data Science Library)
         - Runs `run_centrality()` (Closeness Centrality from TigerGraph Data Science Library)
 
 ![Corpus Directory](images/corpus-dir.png)
 
 # Deployment Instructions
 
-## A. Clone the Github reop
+## A. Clone the Github Repo
 
 ```
 ~/projects> git clone git@github.com:mikewillekes/unsdgftw.git
@@ -166,7 +154,7 @@ Within each `corpus/DATASOURCE` directory, are 5 staging directories representin
 
 ## B. Install Python prerequisites via `pipenv`
 
-Pipenv is a packaging tool that consolidates `pip`, `virutalenv` and `requirements.txt`. For more details on this tool see [Pipenv: A Guide to the New Python Packaging Tool](https://realpython.com/pipenv-guide/)
+Pipenv is a packaging tool that consolidates `pip`, `virtualenv` and `requirements.txt`. For more details on this tool see [Pipenv: A Guide to the New Python Packaging Tool](https://realpython.com/pipenv-guide/)
 
 ```
 ~/projects> cd unsdgftw
@@ -176,9 +164,9 @@ Pipenv is a packaging tool that consolidates `pip`, `virutalenv` and `requiremen
 ~/projects/unsdgftw> pipenv install
 ```
 
-Note: the NLP preprocessing steps were run using Spacy, Hugging Face - Tansformers, Tensorflow and PyTorch. These dependencies were gathered into the Pipenv `dev` dependencies.
+Note: the NLP preprocessing steps were run using Spacy, Hugging Face - Transformers, Tensorflow and PyTorch. These dependencies were gathered into the Pipenv `dev` dependencies.
 
-**These dev libraries are not necessry if you only want load and run the TigerGraph solution**. If you have an NVidia GPU with the Cuda 11.3 libraries installed and you do want to rerun the NLP steps use:
+**These dev libraries are not necessary if you only want load and run the TigerGraph solution**. If you have an NVidia GPU with the Cuda 11.3 libraries installed and you do want to rerun the NLP steps use:
 
 ```
 ~/projects/unsdgftw> pipenv install --dev
@@ -203,7 +191,7 @@ The API token `tg_token` will be echoed to the console after the next step.
 
 ## E. Create the TigerGraph Schema
 
-All of the developement of this Hackathon solution was done in Visual Studio Code with Python 3.8 - but for simplicity the following installation steps are all executed directly on the command line.
+All of the development of this Hackathon solution was done in Visual Studio Code with Python 3.8 - but for simplicity the following installation steps are all executed directly on the command line.
 
 ```
 ~/projects/unsdgftw> export PYTHONPATH=./src
@@ -266,12 +254,12 @@ Click (or copy-and-paste) the Network URL to open in your browser.
 ## Known Issues and Future Improvements
 
 - It was out of scope to build a semantic _search_ interface, only exploration; a future improvement would be to include a semantic search solution via vector similarity.
-- Semantic similarity (cosine distance) was calculated between each sentence and each SDG sub-goal using a pre-trained transformer model. This simple unsupervised ML approach often had diffiulties distinguishing between multiple but similar SGS. Likely a supervised multi-class classifier approach could achieve better results.
+- Semantic similarity (cosine distance) was calculated between each sentence and each SDG sub-goal using a pre-trained transformer model. This simple unsupervised ML approach often had difficulties distinguishing between multiple but similar SGS. Likely a supervised multi-class classifier approach could achieve better results.
 - Research documents themselves contains numerous references to other publications. These were *not* taken into account when building the Knowledge Graph. 
 - Topics, extracted as a collection of words, are _weird_ for displaying to non-NLP enthusiasts. We understand what _"fgm|girls|practice|women|undergone|aged|who|prevalence|years|15"_ is about, but it's not a user-friendly way to display data.
 - SDGs, Entities and Topics were considered 'related' if they co-occurred in the same Paragraph. This is a naive rule that doesn't always hold true (i.e. for very long paragraphs).
 - More Data! About 200 PDFs (~21K Paragraphs of text) were crawled across 5 organizations. The focus of this project was on the NLP, graph algorithms and UI development instead. However with a bit more work, this approach could easily scale to 1000s of documents. 
-- The TigerGraph CSV API is clunky to use as schema changes. Late in the project, a few new fields were added to nodes and edges to explore capabilties of the TigerGraph data science library; but this broke all the existing loading scripts as positional CSV column designations match anymore.
+- The TigerGraph CSV API is clunky to use as schema changes. Late in the project, a few new fields were added to nodes and edges to explore capabilities of the TigerGraph data science library; but this broke all the existing loading scripts as positional CSV column designations match anymore.
 - It could be compelling to explore a proof-of-concept using this Knowledge Graph to generate graph embedding that could be shared to enrich other downstream machine learning tasks. 
 
 ## Open Source Tools
