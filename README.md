@@ -22,6 +22,7 @@ A researcher, development analyst or project coordinator looking for findings th
 - [The International Union for Conservation of Nature](https://portals.iucn.org/library/dir/publications-list)
 - [Intergovernmental Platform for Biodiversity and Ecosystem Services](https://ipbes.net/assessing-knowledge)
 - [IPCC The Intergovernmental Panel on Climate Change](https://www.ipcc.ch/report/sixth-assessment-report-cycle/)
+- [Millennium Ecosystem Assessment](https://www.millenniumassessment.org/en/index.html)
 
 ## Natural Language Processing and TigerGraph to the Rescue!
 
@@ -96,16 +97,135 @@ The end-to-end pipeline is as follows:
 - Streamlit Application UI
     - Launch Streamlit app to view UI
 
+## Raw Data Acquisition and Preprocessing
 
-## Install Python prerequisites via `pipenv`
+The `corpus` directory contains all the staged and processed data for the NLP and Graph. There are 5 top-level directories corresponding to each of the datasources, each directory has a `metadata.jsonl` file describing all the metatada for each source document:
+
+- `corpus/IPBES/metadata.jsonl`
+    - 8 documents (PDF) from the [Intergovernmental Platform for Biodiversity and Ecosystem Services](https://ipbes.net/assessing-knowledge)
+- `corpus/IPCC/metadata.jsonl`
+    - 1 document (PDF) from the [Intergovernmental Panel on Climate Change](https://www.ipcc.ch/report/sixth-assessment-report-cycle/)
+- `corpus/IUCN/metadata.jsonl`
+    - 53 documents (PDF) from the [International Union for Conservation of Nature](https://portals.iucn.org/library/dir/publications-list)
+- `corpus/MA/metadata.jsonl`
+    - 4 documents (PDF) from the [Millennium Ecosystem Assessment](https://www.millenniumassessment.org/en/index.html)
+- `corpus/OKR/metadata.jsonl`
+    - 43 documents (PDF) from the [World Bank Open Data Repository](https://openknowledge.worldbank.org/)
+- `corpus/UNICEF/metadata.jsonl`
+    - 84 documents (PDF) from [UNICEF](https://data.unicef.org/resources/)
+
+Within each `corpus/DATASOURCE` directory, are 5 staging directories representing each stage in the **Semantic Graph Explorer for Sustinable Development** pipeline.
+
+- `1-raw`
+    - Contains raw PDF files manually downloaded or scraped/crawed
+    - These files are excluded from Git due to large size (~1.6GB of PDFs)
+    - Scraping code is in `src/crawl`
+        - **Not necessary for reproducting the TigerGraph solution**
+- `2-text`
+    - Using [Apache Tika](https://tika.apache.org/) a directory of raw PDFs are extacted into XHTML in the `2-text` directory
+    - ``` java -jar ./bin/tika-app-2.3.0.jar ./corpus/IPBES/1-raw ./corpus/IPBES/2-text ```
+    - These files are excluded from Git due to large size
+        - **Not necessary for reproducting the TigerGraph solution**
+- `3-cleantext`
+    - Contains the output of running `src/run_pipeline_step_1_clean_text.py`
+    - This data *is* included in Git (This steps takes several hours to run on all the text documents)
+        - **This directory is necessary for reproducting the TigerGraph solution**
+    - This script:
+        - Parses XHTML output from Tika
+        - Cleans Text:
+            - Normalize whitespace
+            - Normalize unicode chars
+            - Scrubs in-line references (these show up as too-many-names in the Entity extraction step)
+        - Extracts paragraphs
+        - Extracts sentences
+        - Extracts Named-Entities using Spacy
+- `4-nlp`
+    - Contains the output of running `src/run_pipeline_step_2_nlp.py`
+    - This data *is* included in Git (though fast to run, the library dependencies are difficult to setup)
+        - **This directory is necessary for reproducting the TigerGraph solution**
+    - This script builds:
+        - SDG to Sentence Similarity via [Hugging Face Transformers](https://huggingface.co/docs/transformers/index)
+        - Topic modelling of Paragraphs via [BERTopci] 
+
+- `5-graph`
+    - Contains the output of running `src/run_pipeline_step_3_graph.py`
+    - This script:
+        - Builds and stages the TigerGraph CSV files
+        - Loads the CSV files to TigerGraph
+        - Runs `build_comention_edges()` between SDGs, Entities and Topics
+        - Runs `run_community_detection()` (Label Propogation from the TigerGraph Data Science Library)
+        - Runs `run_centrality()` (Closeness Centrality from TigerGraph Data Science Library)
+
+![Corpus Directory](images/corpus-dir.png)
+
+# Deployment Instructions
+
+## A. Clone the Github reop
+
+```
+~/projects> git clone git@github.com:mikewillekes/unsdgftw.git
+```
+
+## B. Install Python prerequisites via `pipenv`
 
 Pipenv is a packaging tool that consolidates `pip`, `virutalenv` and `requirements.txt`. For more details on this tool see [Pipenv: A Guide to the New Python Packaging Tool](https://realpython.com/pipenv-guide/)
 
+```
+~/projects> cd unsdgftw
 
+~/projects/unsdgftw> pipenv shell
 
-## Data
+~/projects/unsdgftw> pipenv install
+```
 
-The
+Note: the NLP preprocessing steps were run using Spacy, Hugging Face - Tansformers, Tensorflow and PyTorch. These dependencies were gathered into the Pipenv `dev` dependencies.
+
+**These dev libraries are not necessry if you only want load and run the TigerGraph solution**. If you have an NVidia GPU with the Cuda 11.3 libraries installed and you do want to rerun the NLP steps use:
+
+```
+~/projects/unsdgftw> pipenv install --dev
+```
+
+## C. Create a TigerGraph Cloud Solution
+
+Log in to [tgcloud.io](tgcloud.io) and create a new free-tier solution; Make note of the custom domain (i.e.: `unsdgftw.i.tgcloud.io`)
+
+## D. Create a Local `.env` File for Secrets
+
+Create the file `.env` in the project root (i.e. `unsdgftw/.env`) supplying the `tg_host` value from the previous step.
+
+```
+tg_host="https://unsdgftw.i.tgcloud.io"
+tg_username="tigergraph"
+tg_password="YOUR_TIGERGRAPH_SOLUTION_ADMIN_PASSWORD"
+tg_token=""
+```
+
+The API token `tg_token` will be echoed to the console after the next step. 
+
+## E. Create the TigerGraph Schema
+
+All of the developement of this Hackathon solution was done in Visual Studio Code with Python 3.8 - but for simplicity the following installation steps are all executed directly on the command line.
+
+```
+~/projects/unsdgftw> export PYTHONPATH=./src
+
+~/projects/unsdgftw>~/projects/unsdgftw> python src/graph/tg_create_schema.py
+```
+
+Copy the `token` from the last line of the console output into the `.env` file. _Note: this token is scrubbed and recreated when the new schema is created, so don't copy the one in the attached screenshot._
+
+![Schema Creation](images/installation-create-schema.png)
+
+## F. Install the Queries
+
+```
+~/projects/unsdgftw> export PYTHONPATH=./src
+
+~/projects/unsdgftw>~/projects/unsdgftw> python src/graph/tg_install_queries.py
+```
+
+![Install Queries](images/installation-install-queries.png)
 
 
 
