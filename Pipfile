@@ -4,7 +4,6 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-jupyter = "*"
 beautifulsoup4 = "*"
 spacy = {extras = ["cuda113", "transformers"], version = "*"}
 transformers = "*"
@@ -20,6 +19,7 @@ python-dotenv = "*"
 streamlit = "*"
 pyserde = "*"
 plotly = "*"
+jupyter = "*"
 
 [requires]
 python_version = "3.8"
