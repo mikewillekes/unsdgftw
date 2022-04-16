@@ -4,21 +4,21 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-
-[packages]
+jupyter = "*"
 beautifulsoup4 = "*"
 spacy = {extras = ["cuda113", "transformers"], version = "*"}
 pyserde = "*"
-jupyter = "*"
 transformers = "*"
 tensorflow-gpu = "*"
 sentence-transformers = "*"
-pytigergraph = "*"
-python-dotenv = "*"
 bertopic = "*"
-streamlit = "*"
 dateparser = "*"
 requests = "*"
+
+[packages]
+pytigergraph = "*"
+python-dotenv = "*"
+streamlit = "*"
 
 [requires]
 python_version = "3.8"
