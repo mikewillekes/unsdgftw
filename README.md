@@ -35,7 +35,6 @@ The concept of applying Natural Language Processing techniques to extract and co
 
 The goal of this project was to build a solution that empowered non-technical (about programming, web-crawling, machine learning or graph databases) users to easily discover links between Documents, SDGs, Entities (people, places and organizations) and Topics, while always retaining the link back to a source document or paragraph.
 
-
 ### A Single Document
 ![Graph representation of one document](images/single-document.gif)
 
@@ -56,18 +55,17 @@ Use the **Semantic Graph Explorer for Sustinable Development** to find SDGs, Top
 Using a [Ploty](plotly.com) and the data in TigerGraph, it's possible to explore the SDG, Entity and Topic relationships with a document in a visual format. This capability was developed very late, and though it makes for an interesting visual - the analytic usefulness is limited in the current form.
 ![Document Histogram](images/document-histogram.gif)
 
+## Impactfulness
+How does your project positively impact people’s lives? In your response, address the following: How many people, families and organizations does your solution help? What’s the level of social and/or economic benefit to the world and how does your solution address the root issue(s)? When relevant, please provide data-backed (i.e. citation, research, reports, statistics, etc) arguments to support your claim.
 
-Explain what your project is trying to accomplish and how you utilized graph technology to achieve those goals. 
-Describe how your submission is relevant to the problem statement and why it is impactful to the world. Remember to link your submission video here. 
+## Innovativeness
+How does your project offer a novel use of graph or approach to the problem? In your response, address the following: Did you frame a complicated problem in a new way? Did you come up with a creative way to overcome the challenges? When relevant, please provide data-backed (i.e. citation, research, reports, statistics, etc) arguments to support your claim.
 
-Tell us how your entry was the most...					
+## Ambitiousness
+How does your project push the boundaries of, scale and scope of graph to solve real world problems? In your response, address the following: What is your graph schema size (entity types, relationship types, domains, etc? What’s the scale of your graph solution and the functional features you’ve added? When relevant, please provide data-backed (i.e. citation, research, reports, statistics, etc) arguments to support your claim.
 
-- Impactful in solving a real world problem 
-- Innovative use case of graph
-- Ambitious and complex graph
-- Applicable graph solution 
-
-Other additions: 
+## Applicability
+How will your project be adopted and applied by other organizations or industries? In your response, address the following: How easy will it be to put your solution into real-world use? How many industries could adopt your solution? What is the size of this market or industry that could adopt your solution? When relevant, please provide data-backed (i.e. citation, research, reports, statistics, etc) arguments to support your claim. 
 
 # Technical Details
 
@@ -256,16 +254,16 @@ Click (or copy-and-paste) the Network URL to open in your browser.
 
 ![Homepage](images/installation-streamlit.png)
 
-## Reflections
+# Reflections
 
-### What Went Well
+## What Went Well
 
 - From early-on, a priority was placed on scripts to automate the end-to-end flow: regenerating datasets from raw PDFs, to dropping-and-recreating the TigerGraph schema and installing queries, loading data and enriching the graphs with augmented edges, centrality and community detection; This enabled fast, frequent iteration as all of the moving parts started coming together
 - The graph schema worked very well from inception to delivery
 ![Graph Schema](images/schema.png)
 - The TigerGraph and GSQL tools were easy get started, well documented and performed extremely well; however it did take a while to adjust to thinking in terms of GSQL and Accumulators vs. relational SQL
 
-### Known Issues and Future Improvements
+## Known Issues and Future Improvements
 
 - It was out of scope to build a semantic _search_ interface, only exploration; a future improvement would be to include a semantic search solution via vector similarity.
 - Semantic similarity (cosine distance) was calculated between each sentence and each SDG sub-goal using a pre-trained transformer model. This simple unsupervised ML approach often had diffiulties distinguishing between multiple but similar SGS. Likely a supervised multi-class classifier approach could achieve better results.
@@ -276,15 +274,14 @@ Click (or copy-and-paste) the Network URL to open in your browser.
 - The TigerGraph CSV API is clunky to use as schema changes. Late in the project, a few new fields were added to nodes and edges to explore capabilties of the TigerGraph data science library; but this broke all the existing loading scripts as positional CSV column designations match anymore.
 - It could be compelling to explore a proof-of-concept using this Knowledge Graph to generate graph embedding that could be shared to enrich other downstream machine learning tasks. 
 
-
-### Open Source Tools
+## Open Source Tools
 - [Hugging Face: Transformers](https://huggingface.co/docs/transformers/index)
 - [spaCy](https://spacy.io/)
 - [BERTopic: Topic modelling with Transformers](https://maartengr.github.io/BERTopic/index.html)
 - [Apache Tika: PDF Text Extraction](https://tika.apache.org/)
 - [Beautiful Soup: HTML processing](https://beautiful-soup-4.readthedocs.io/en/latest/)
 
-### Blog Posts and Videos
+## Blog Posts and Videos
 - [Use PyTorch and TensorFlow with an NVIDIA GPU in the Windows Linux Subsystem (WSL)
 ](https://youtu.be/mWd9Ww9gpEM)
 - [Organizing your scholarly PDFs to easily find keywords using pdfminer.six](https://medium.com/@boilertoad_30976/organizing-your-scholarly-pdfs-to-easily-find-keywords-using-pdfminer-six-b50409b5015f)
