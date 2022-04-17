@@ -1,6 +1,7 @@
 # Semantic Graph Explorer for Sustainable Development
 
 A submission for the [TigerGraph Graph for All Challenge](https://www.tigergraph.com/graph-for-all/) by Mike Willekes
+- [YouTube Project Overview](https://youtu.be/1IZuQx_rjx4E)
 - [Mail](mailto:mikewillekes@gmail.com)
 - [Twitter](https://twitter.com/mikewillekes)
 - [GitHub](https://github.com/mikewillekes)
