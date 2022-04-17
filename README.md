@@ -233,7 +233,7 @@ Once loaded (and `build_comention_edges()` is complete) you should end up with a
 
 ~/projects/unsdgftw> streamlit run src/streamlit_app.py
  
- You can not view your Streamlit app in your browser.
+ You can now view your Streamlit app in your browser.
 
  Network URL: http://X.X.X.X:8501
  External URL: http://Y.Y.Y.Y:8501
